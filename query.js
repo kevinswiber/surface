@@ -586,56 +586,78 @@ var YYSTATE=YY_START;
 switch($avoiding_name_collisions) {
 case 0:/* skip whitespace */
 break;
-case 1:return 6
+case 1: this.begin('sel'); return 6; 
 break;
-case 2:return 10
+case 2:return 12
 break;
-case 3:return 12
+case 3:return 10
 break;
-case 4:return 14
+case 4: this.begin('fltr'); return 14; 
 break;
-case 5:return 19
+case 5:return 13
 break;
-case 6:return 20
+case 6:
+                                          yy_.yytext = yy_.yytext.slice(1, -1);
+                                          return 13;
+                                        
 break;
-case 7:return 26
+case 7:return 19
 break;
-case 8:return 19
+case 8:return 20
 break;
-case 9:return 20
+case 9:return 26
 break;
-case 10:return 24
+case 10:return 19
 break;
-case 11:return 27
+case 11:return 20
 break;
-case 12: this.begin('location'); return 29; 
+case 12: this.popState(); return 5; 
 break;
-case 13: yy_.yytext = letterify(yy_.yytext); return 24; 
+case 13: this.begin('asgn'); return 13; 
 break;
-case 14:return 5
+case 14:
+                                          this.begin('asgn');
+                                          yy_.yytext = yy_.yytext.slice(1, -1);
+                                          return 13;
+                                        
 break;
-case 15:return 13
+case 15:return 24
 break;
-case 16:return 28
+case 16:
+                                          yy_.yytext = letterify(yy_.yytext);
+                                          return 24;
+                                        
 break;
-case 17:return 31
+case 17:return 27
 break;
-case 18:/* skip whitespace */
+case 18: this.begin('loc'); return 29; 
 break;
-case 19:return 32
+case 19: this.popState(); return 28; 
 break;
-case 20:return 12
+case 20: this.popState(); return 31; 
 break;
-case 21: this.popState(); return 19; 
+case 21:return 31
 break;
-case 22: this.popState(); return 20; 
+case 22:return 32
 break;
-case 23:return 31
+case 23:
+                                          this.popState(); /* asgn */
+                                          this.popState(); /* fltr */
+                                          return 19;
+                                        
+break;
+case 24:
+                                          this.popState(); /* asgn */
+                                          this.popState(); /* fltr */
+                                          return 20;
+                                        
+break;
+case 25:return 5
 break;
 }
 },
-rules: [/^(?:\s+)/i,/^(?:select\b)/i,/^(?:\*)/i,/^(?:,)/i,/^(?:where\b)/i,/^(?:and\b)/i,/^(?:or\b)/i,/^(?:not\b)/i,/^(?:&&)/i,/^(?:\|\|)/i,/^(?:eq|gt|lt|gte|lte\b)/i,/^(?:contains\b)/i,/^(?:within\b)/i,/^(?:=|>|<|>=|<=)/i,/^(?:$)/i,/^(?:[A-Za-z][\.A-Za-z0-9_-]*)/i,/^(?:(["'])(?:(?!\1)[^\\]|\\.)*\1)/i,/^(?:([+-]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?))/i,/^(?:\s+)/i,/^(?:of\b)/i,/^(?:,)/i,/^(?:and\b)/i,/^(?:or\b)/i,/^(?:([+-]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?))/i],
-conditions: {"location":{"rules":[14,18,19,20,21,22,23],"inclusive":false},"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"inclusive":true}}
+rules: [/^(?:\s+)/i,/^(?:select\b)/i,/^(?:,)/i,/^(?:\*)/i,/^(?:where\b)/i,/^(?:([A-Za-z][\.A-Za-z0-9_-]*))/i,/^(?:(\[(?:(?!\])[^\\]|\\.)*\]))/i,/^(?:and\b)/i,/^(?:or\b)/i,/^(?:not\b)/i,/^(?:&&)/i,/^(?:\|\|)/i,/^(?:$)/i,/^(?:([A-Za-z][\.A-Za-z0-9_-]*))/i,/^(?:(\[(?:(?!\])[^\\]|\\.)*\]))/i,/^(?:eq|gt|lt|gte|lte\b)/i,/^(?:=|>|<|>=|<=)/i,/^(?:contains\b)/i,/^(?:within\b)/i,/^(?:(["'])(?:(?!\1)[^\\]|\\.)*\1)/i,/^(?:([+-]?[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?))/i,/^(?:([+-]?[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?))/i,/^(?:of\b)/i,/^(?:and\b)/i,/^(?:or\b)/i,/^(?:$)/i],
+conditions: {"sel":{"rules":[0,2,3,4,5,6],"inclusive":false},"fltr":{"rules":[0,2,7,8,9,10,11,12,13,14],"inclusive":false},"asgn":{"rules":[0,15,16,17,18,19,20],"inclusive":false},"loc":{"rules":[0,2,21,22,23,24,25],"inclusive":false},"INITIAL":{"rules":[0,1,25],"inclusive":true}}
 };
 function letterify(op) {
   switch(op) {
