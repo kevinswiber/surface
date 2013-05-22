@@ -1,5 +1,5 @@
 number        [+-]?[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?
-name          [A-Za-z][\.A-Za-z0-9_-]*
+name          [A-Za-z0-9_-][\.A-Za-z0-9_-]*
 escaped_name  \[(?:(?!\])[^\\]|\\.)*\]
 
 %options case-insensitive

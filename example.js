@@ -13,7 +13,7 @@ collections.forEach(function(collection) {
   proxy.get('/' + encodeURIComponent(collection), function(handle) {
     handle('request', function(env, next) {
       var query = url.parse(env.request.url, true).query;
-      var ql = query.ql || 'select * where [_id] > "0"';
+      var ql = query.ql || 'select * where _id > "0"';
 
       var collectionPath = encodeURIComponent(collection) + '/';
       var queryRunner = couch({ uri: databaseUri + collectionPath });
