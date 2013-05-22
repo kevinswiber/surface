@@ -1,0 +1,16 @@
+{
+  "name": "surface",
+  "version": "0.0.0",
+  "description": "ERROR: No README.md file found!",
+  "main": "ast.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/kevinswiber/surface.git"
+  },
+  "author": "",
+  "license": "BSD",
+  "gitHead": "dd22517d0973d75a3e75c94d28e067b9615de67e"
+}

@@ -3,7 +3,7 @@ var Ast = {};
 Ast.SelectStatementNode = function(fieldListNode, filterNode) {
   this.fieldListNode = fieldListNode;
   this.filterNode = filterNode;
-  this.type = 'selectStatement';
+  this.type = 'SelectStatement';
 };
 
 Ast.FieldListNode = function(seed) {
@@ -13,7 +13,7 @@ Ast.FieldListNode = function(seed) {
     this.fields.push(seed);
   }
 
-  this.type = 'fieldListNode';
+  this.type = 'FieldList';
 };
 
 Ast.FieldListNode.prototype.push = function(field) {
@@ -22,55 +22,63 @@ Ast.FieldListNode.prototype.push = function(field) {
 
 Ast.FilterNode = function(expression) {
   this.expression = expression;
-  this.type = 'filter'
+  this.type = 'Filter'
 };
 
 Ast.DisjunctionNode = function(left, right) {
   this.left = left;
   this.right = right;
-  this.type = 'disjunction';
+  this.type = 'Disjunction';
 };
 
 Ast.ConjunctionNode = function(left, right) {
   this.left = left;
   this.right = right;
-  this.type = 'conjunction';
+  this.type = 'Conjunction';
 };
 
-Ast.ComparisonPredicateNode = function(field, comparison, value, isNegated) {
+Ast.ComparisonPredicateNode = function(field, operator, value, isNegated) {
   this.field = field;
-  this.comparison = comparison;
+  this.operator = operator;
   this.value = value;
   this.isNegated = isNegated;
-  this.type = 'comparisonPredicate';
+  this.type = 'ComparisonPredicate';
 };
 
 Ast.ContainsPredicateNode = function(field, value, isNegated) {
   this.field = field;
-  this.comparison = 'contains';
+  this.operator = 'contains';
   this.value = value;
   this.isNegated = isNegated;
-  this.type = 'containsPredicate';
+  this.type = 'ContainsPredicate';
 };
 
 Ast.LocationPredicateNode = function(field, value, isNegated) {
   this.field = field;
-  this.comparison = 'within';
+  this.operator = 'within';
   this.value = value;
   this.isNegated = isNegated;
-  this.type = 'locationPredicate';
+  this.type = 'LocationPredicate';
 };
 
 Ast.LocationNode = function(distance, coordinates) {
   this.distance = distance;
   this.coordinates = coordinates;
-  this.type = 'location'
+  this.type = 'Location'
 };
 
 Ast.CoordinatesNode = function(lattitude, longitude) {
   this.lattitude = lattitude;
   this.longitude = longitude;
-  this.type = 'coordinates';
+  this.type = 'Coordinates';
 };
+
+Object.keys(Ast).forEach(function(key) {
+  if (Ast.hasOwnProperty(key)) {
+    Ast[key].prototype.accept = function(visitor) {
+      visitor.visit(this);
+    };
+  }
+});
 
 module.exports = Ast;
