@@ -1,24 +1,49 @@
 var url = require('url');
 var argo = require('argo');
-var couch = require('./couchdb');
+var conf = require('./surface.conf');
+var visitor = require('./' + conf.type);
 
-var collections = ['kweeri', 'alps', 'api-craft-conf-detroit2013'];
-var databaseUri = 'http://localhost:5984/';
-var baseUri = 'http://localhost:3000/';
-var relUri = 'http://localhost:3000/rels/';
+var collections = conf.collections;
+var databaseUri = conf.db;
+var baseUri = conf.href;
+var relUri = conf.rel;
 
 var proxy = argo();
 
 collections.forEach(function(collection) {
-  proxy.get('/' + encodeURIComponent(collection), function(handle) {
+  collection = encodeURIComponent(collection);
+  proxy.get('/' + collection, function(handle) {
     handle('request', function(env, next) {
-      var query = url.parse(env.request.url, true).query;
-      var ql = query.ql || 'select * where _id > "0"';
+      var ql;
+      var isCollection = true;
 
-      var collectionPath = encodeURIComponent(collection) + '/';
-      var queryRunner = couch({ uri: databaseUri + collectionPath });
+      if (env.request.url.split('/').length > 2) {
+        isCollection = false;
+        var id = env.request.url.split('/')[2];
+        if (!id) {
+          env.response.statusCode = 404;
+          return next(env);
+        }
+        ql = 'select * where _id="' + id + '"';
+      } else {
+        isCollection = true;
+        var query = url.parse(env.request.url, true).query;
+        ql = query.ql || 'select * where _id > "0"';
+      }
+
+      var collectionPath = collection + '/';
+      var queryRunner = visitor({ uri: databaseUri + collectionPath });
       queryRunner.exec(ql, function(err, res, body) {
-        body = sirenify(baseUri + env.request.url.slice(1), collectionPath, body);
+        if (body) {
+          if (typeof body === 'string') body = JSON.parse(body);
+          if (isCollection) {
+            body = sirenify(baseUri + env.request.url.slice(1), collectionPath, body);
+          } else if (body.rows[0]) {
+            var item = body.rows[0];
+            body = sirenifyItem(collectionPath, item);
+            delete body.rel;
+          }
+        }
 
         env.response.setHeader('Content-Type', 'application/vnd.siren+json');
         env.response.body = body;
@@ -32,22 +57,32 @@ proxy.listen(process.env.PORT || 3000);
 
 var sirenify = function(url, collectionPath, body) {
   if (!body) return body;
-  if (typeof body === 'string') body = JSON.parse(body);
 
- var skeleton = {
+  var skeleton = {
    class: ['search-results'],
    properties: {},
    entities: [],
    links: []
- };
+  };
 
- skeleton.links.push({ rel: ['self'], href: url });
+  skeleton.links.push({ rel: ['self'], href: url });
 
- skeleton.properties.count = body.total_rows || 0;
+  skeleton.properties.count = body.total_rows || 0;
 
- if (!body.rows) return skeleton;
+  if (!body.rows) return skeleton;
 
- body.rows.forEach(function(row) {
+  body.rows.forEach(function(row) {
+   var entity = sirenifyItem(collectionPath, row);
+   if (row.value.type) {
+     entity.rel.push(relUri + row.value.type);
+   }
+   skeleton.entities.push(entity);
+  });
+
+  return skeleton;
+};
+
+var sirenifyItem = function(collectionPath, row) {
    var entity = { 
      class: [],
      rel: [],
@@ -61,16 +96,11 @@ var sirenify = function(url, collectionPath, body) {
    });
 
    if (row.value.type) {
-     entity.rel.push(relUri + row.value.type);
      entity.class.push(row.value.type);
    }
 
-   skeleton.entities.push(entity);
- });
-
- return skeleton;
+   return entity;
 };
-
 var sirenifyEdit = function(url, body) {
   if (!body) return body;
   if (typeof body === 'string') body = JSON.parse(body);

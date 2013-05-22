@@ -1,0 +1,7 @@
+{
+  "collections": ["users", "kweeri", "alps", "api-craft-conf-detroit2013"],
+  "db": "http://localhost:5984/",
+  "href": "http://localhost:3000/",
+  "rel": "http://localhost:3000/rels/",
+  "type": "couchdb"
+}
