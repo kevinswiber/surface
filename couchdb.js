@@ -136,6 +136,9 @@ CouchVisitor.prototype.createView = function() {
     emitStr = 'doc'
   } else {
     var emit = [];
+    if (!~this.fields.indexOf('type')) {
+      this.fields.push('type');
+    }
     this.fields.forEach(function(field) {
       emit.push('\'' + field + '\': doc[\'' + field + '\']');
     });
