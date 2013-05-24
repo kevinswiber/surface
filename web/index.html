@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" ng-app>
+<html lang="en" ng-app="surface">
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
@@ -26,7 +26,7 @@
       </div>
     </div>
 
-    <div class="container" ng-controller="MainEntityController">
+    <div class="container" ng-controller="MainEntityCtrl">
 
       <h1>Explore data with Surface</h1>
       <div id="control-panel">
@@ -44,7 +44,7 @@
         </form>
       </div>
 
-      <div id="response">
+      <div id="response" ng-cloak>
         <div id="properties" ng-show="properties.length">
           <h3>Properties</h3>
           <dl>
@@ -57,7 +57,23 @@
           <h3>Entities</h3>
           <ul>
             <li ng-repeat="entity in entities">
-              {{ entity.properties.length }}
+              <div id="sub-properties" ng-show="entity.properties.length">
+                <h4>Properties</h4>
+                <dl>
+                  <span ng-repeat="pair in entity.properties">
+                    <dt>{{ pair.key }}</dt><dd>{{ pair.value }}</dd>
+                  </span> 
+                </dl>
+              </div>
+              <div id="sub-links" ng-show="entity.links.length">
+                <h4>Links</h4>
+                <ul>
+                  <li ng-repeat="link in entity.links">
+                  <a href="#entity-modal" data-toggle="modal" data-href="{{ link.href }}"
+                   class="entity-link {{ link.rel }}">{{ link.rel }}</a>
+                  </li>
+                </ul>
+              </div>
             </li>
           </ul>
         </div>
@@ -100,6 +116,8 @@
     <script src="//code.jquery.com/jquery-1.9.1.min.js"></script>
     <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.min.js"></script>
-    <script src="scripts/web.js"></script>
+    <script src="scripts/entity/controllers.js"></script>
+    <script src="scripts/entity/module.js"></script>
+    <script src="scripts/app.js"></script>
   </body>
 </html>
