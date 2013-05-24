@@ -1,7 +1,6 @@
 var EntityCtrls = {};
 
 EntityCtrls.MainEntityCtrl = function($scope, $http) {
-  console.log('in main entity controller.');
   $scope.rootUrl = 'http://localhost:3000';
   $scope.collection = 'kweeri';
   $scope.query = 'select * where first_name="Kevin"';
