@@ -1,7 +1,7 @@
 var url = require('url');
 var argo = require('argo');
 var conf = require('./surface.conf');
-var visitor = require('./' + conf.type);
+var visitor = require('../' + conf.type);
 
 var collections = conf.collections;
 var databaseUri = conf.db;
