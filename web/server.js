@@ -19,7 +19,8 @@ argo()
         return next(env);
       }
 
-      var filename = env.request.url === '/' ? 'index.html' : env.request.url.substr(1);
+      var filename = __dirname +
+        (env.request.url === '/' ? '/index.html' : env.request.url)
 
       fs.stat(filename, function(err, stat) {
         if (err) {
