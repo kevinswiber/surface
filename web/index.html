@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en" ng-app>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+    <link href="styles/web.css" rel="stylesheet" />
+  </head>
+  <body>
+
+   <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="brand" href="#">Surface Browser</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav">
+              <li class="active"><a href="#">Home</a></li>
+              <li><a href="#about">About</a></li>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+
+    <div class="container" ng-controller="MainEntityController">
+
+      <h1>Explore data with Surface</h1>
+      <div id="control-panel">
+        <form id="settings" ng-submit="fetch()">
+          <label class="control-label" for="rootUrl">Root URL:</label>
+          <input type="text" size="60" class="input-xlarge" id="rootUrl" name="rootUrl" ng-model="rootUrl"/>
+
+          <label class="control-label" for="collection">Collection:</label>
+          <input type="text" size="45" id="collection" name="collection" ng-model="collection"/>
+
+          <label class="control-label" for="query">Query:</label>
+          <input type="text" size="100" class="input-xxlarge" id="query" name="query" ng-model="query"/><br/>
+
+          <input type="submit" name="submit" value="Go" class="btn btn-primary"/>
+        </form>
+      </div>
+
+      <div id="response">
+        <div id="properties" ng-show="properties.length">
+          <h3>Properties</h3>
+          <dl>
+            <span ng-repeat="pair in properties">
+              <dt>{{ pair.key }}</dt><dd>{{ pair.value }}</dd>
+            </span> 
+          </dl>
+        </div>
+        <div id="entities" ng-show="entities.length">
+          <h3>Entities</h3>
+          <ul>
+            <li ng-repeat="entity in entities">
+              {{ entity.properties.length }}
+            </li>
+          </ul>
+        </div>
+        <div id="actions">
+        </div>
+        <div id="links" ng-show="links.length">
+          <h3>Links</h3>
+          <ul>
+            <li ng-repeat="link in links">
+            <a href="#entity-modal" data-toggle="modal" data-href="{{ link.href }}"
+             class="entity-link {{ link.rel }}">{{ link.rel }}</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div id="entity-modal" class="modal hide fade" tabindex="-1" role="dialog"
+       aria-labelledby="modal-label" aria-hidden="true">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
+          <h3 id="modal-label">Entity</h3>
+        </div>
+        <div class="modal-body">
+          <div id="modal-properties">
+          </div>
+          <div id="modal-entities">
+          </div>
+          <div id="modal-actions">
+          </div>
+          <div id="modal-links">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Close</button>
+        </div>
+      </div>
+
+    </div> <!-- /container -->
+
+    <script src="//code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.min.js"></script>
+    <script src="scripts/web.js"></script>
+  </body>
+</html>

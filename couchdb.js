@@ -51,7 +51,7 @@ CouchVisitor.prototype.visitFilter = function(filterList) {
   this.map = this.createView();
 };
 
-CouchVisitor.prototype.visitDisjunctionNode = function(disjunction) {
+CouchVisitor.prototype.visitDisjunction = function(disjunction) {
   var isRightPredicate = disjunction.right.type.slice(-9) === 'Predicate';
 
   if (isRightPredicate) {
@@ -65,16 +65,18 @@ CouchVisitor.prototype.visitDisjunctionNode = function(disjunction) {
   }
 };
 
-CouchVisitor.prototype.visitConjunctionNode = function(conjunction) {
+CouchVisitor.prototype.visitConjunction = function(conjunction) {
   var isRightPredicate = conjunction.right.type.slice(-9) === 'Predicate';
 
   if (isRightPredicate) {
     this.conjunctions.push(conjunction.right);
   }
 
+  conjunction.left.array = this.andPredicates;
   conjunction.left.accept(this);
 
   if (!isRightPredicate) {
+    conjunction.right.array = this.andPredicates
     conjunction.right.accept(this);
   }
 };
@@ -109,7 +111,7 @@ CouchVisitor.prototype.createView = function() {
   if (this.disjunctions) {
     var self = this;
     this.disjunctions.forEach(function(predicate) {
-      predicate.array = orPredicates;
+      predicate.array = this.orPredicates;
       predicate.accept(self);
     });
   }

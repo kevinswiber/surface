@@ -10,6 +10,13 @@ var relUri = conf.rel;
 
 var proxy = argo();
 
+proxy.use(function(handle) {
+  handle('response', function(env, next) {
+    env.response.setHeader('Access-Control-Allow-Origin', '*');
+    next(env);
+  });
+});
+
 collections.forEach(function(collection) {
   collection = encodeURIComponent(collection);
   proxy.get('/' + collection, function(handle) {
