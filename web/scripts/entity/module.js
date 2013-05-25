@@ -1,4 +1,7 @@
 angular
   .module('entity', [])
   .controller('MainEntityCtrl',
-      ['$scope', '$http', EntityCtrls.MainEntityCtrl]);
+      ['$scope', '$http', 'entityParams', EntityCtrls.MainEntityCtrl])
+  .factory('entityParams', function() {
+    return { url: '' };
+  });

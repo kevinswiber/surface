@@ -1,0 +1,45 @@
+<div id="response" ng-cloak ng-controller="MainEntityCtrl" ng-init="fetch()">
+  <div id="properties" ng-show="main.properties.length">
+    <h3>Properties</h3>
+    <dl>
+      <span ng-repeat="pair in main.properties">
+        <dt>{{ pair.key }}</dt><dd>{{ pair.value }}</dd>
+      </span> 
+    </dl>
+  </div>
+  <div id="entities" ng-show="main.entities.length">
+    <h3>Entities</h3>
+    <ul>
+      <li ng-repeat="entity in main.entities">
+        <div id="sub-properties" ng-show="entity.properties.length">
+          <h4>Properties</h4>
+          <dl>
+            <span ng-repeat="pair in entity.properties">
+              <dt>{{ pair.key }}</dt><dd>{{ pair.value }}</dd>
+            </span> 
+          </dl>
+        </div>
+        <div id="sub-links" ng-show="entity.links.length">
+          <h4>Links</h4>
+          <ul>
+            <li ng-repeat="link in entity.links">
+            <a href="#entity-modal" data-toggle="modal" data-href="{{ link.href }}"
+             class="entity-link {{ link.rel }}">{{ link.rel }}</a>
+            </li>
+          </ul>
+        </div>
+      </li>
+    </ul>
+  </div>
+  <div id="actions">
+  </div>
+  <div id="links" ng-show="main.links.length">
+    <h3>Links</h3>
+    <ul>
+      <li ng-repeat="link in main.links">
+      <a href="#entity-modal" data-toggle="modal" data-href="{{ link.href }}"
+       class="entity-link {{ link.rel }}">{{ link.rel }}</a>
+      </li>
+    </ul>
+  </div>
+</div>

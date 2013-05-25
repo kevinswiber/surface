@@ -1,44 +1,20 @@
 var EntityCtrls = {};
 
-EntityCtrls.MainEntityCtrl = function($scope, $http) {
-  $scope.rootUrl = 'http://localhost:3000';
-  $scope.collection = 'kweeri';
-  $scope.query = 'select * where first_name="Kevin"';
-  
-  $scope.properties = [];
-  $scope.entities = [];
-  $scope.actions = [];
-  $scope.links = [];
-
+EntityCtrls.MainEntityCtrl = function($scope, $http, entityParams) {
   $scope.fetch = function() {
-    $scope.properties = [];
-    $scope.entities = [];
-    $scope.actions = [];
-    $scope.links = [];
+    $scope.main = {
+      properties: [],
+      entities: [],
+      actions: [],
+      links: []
+    };
 
-    var rootUrl = $scope.rootUrl;
-    var collection = $scope.collection;
-    var query = $scope.query;
-
-    var url = '';
-    if (rootUrl) {
-      url += rootUrl;
-    }
-    if (collection) {
-      if (url.slice(-1) === '/') {
-        url = url.slice(0, -1);
-      }
-      url += '/' + encodeURIComponent(collection);
-    }
-    if (query) {
-      url += '?ql=' + encodeURIComponent(query);
-    }
-
-    $http.get(url).success(function(data, status, headers, config) {
+    $http.get(entityParams.url).success(function(data, status, headers, config) {
+      console.log(data);
       if (typeof data === 'string') data = JSON.parse(data);
 
       angular.forEach(data.properties, function(value, key) {
-        $scope.properties.push({ key: key, value: value });
+        $scope.main.properties.push({ key: key, value: value });
       });
 
       if (data.entities) {
@@ -63,14 +39,14 @@ EntityCtrls.MainEntityCtrl = function($scope, $http) {
             entity.links = links;
           }
 
-          $scope.entities.push(entity);
+          $scope.main.entities.push(entity);
         });
       };
 
       if (data.links) {
         angular.forEach(data.links, function(link) {
           angular.forEach(link.rel, function(rel) {
-            $scope.links.push({ rel: rel, href: link.href });
+            $scope.main.links.push({ rel: rel, href: link.href });
           });
         });
       }
