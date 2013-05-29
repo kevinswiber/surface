@@ -4,15 +4,27 @@ escaped_name  \[(?:(?!\])[^\\]|\\.)*\]
 
 %options case-insensitive
 
-%x sel fltr asgn loc
+%x sel fltr asgn loc ordby
 
 %%
 
-<INITIAL,sel,fltr,asgn,loc>\s+          /* skip whitespace */
-"select"                                { this.begin('sel'); return 'SELECT'; }
-<sel,fltr,loc>","                       return 'COMMA'
+<INITIAL,sel,fltr,asgn,loc,ordby>\s+    /* skip whitespace */
+"select"                                {
+                                          this.begin('sel');
+                                          return 'SELECT';
+                                        }
+<sel,fltr,loc,ordby>","                 return 'COMMA'
 <sel>"*"                                return 'STAR'
-<sel>"where"                            { this.begin('fltr'); return 'WHERE'; }
+<sel>"where"                            {
+                                          this.popState(); /* in: INITIAL */
+                                          this.begin('fltr');
+                                          return 'WHERE';
+                                        }
+<sel,fltr>"order by"                    {
+                                          this.popState(); /* in: INITIAL */
+                                          this.begin('ordby');
+                                          return 'ORDERBY';
+                                        }
 <sel>{name}                             return 'NAME'
 <sel>{escaped_name}                     {
                                           yytext = yytext.slice(1, -1);
@@ -23,8 +35,14 @@ escaped_name  \[(?:(?!\])[^\\]|\\.)*\]
 <fltr>"not"                             return 'NOT'
 <fltr>"&&"                              return 'AND'
 <fltr>"||"                              return 'OR'
-<fltr><<EOF>>                           { this.popState(); return 'EOF'; }
-<fltr>{name}                            { this.begin('asgn'); return 'NAME'; }
+<sel,fltr,ordby><<EOF>>                 {
+                                          this.popState(); /* in: INITIAL */
+                                          return 'EOF';
+                                        }
+<fltr>{name}                            {
+                                          this.begin('asgn');
+                                          return 'NAME';
+                                        }
 <fltr>{escaped_name}                    {
                                           this.begin('asgn');
                                           yytext = yytext.slice(1, -1);
@@ -36,20 +54,42 @@ escaped_name  \[(?:(?!\])[^\\]|\\.)*\]
                                           return 'COMPARISON';
                                         }
 <asgn>"contains"                        return 'CONTAINS'
-<asgn>"within"                          { this.begin('loc'); return 'WITHIN'; }
-<asgn>(["'])(?:(?!\1)[^\\]|\\.)*\1      { this.popState(); return 'STRING'; }
-<asgn>{number}                          { this.popState(); return 'NUMBER'; }
+<asgn>"within"                          {
+                                          this.begin('loc');
+                                          return 'WITHIN';
+                                        }
+<asgn>(["'])(?:(?!\1)[^\\]|\\.)*\1      {
+                                          this.popState(); /* in: fltr */
+                                          return 'STRING';
+                                        }
+<asgn>{number}                          {
+                                          this.popState(); /* in: fltr */
+                                          return 'NUMBER';
+                                        }
 <loc>{number}                           return 'NUMBER'
 <loc>"of"                               return 'OF'
 <loc>"and"                              {
-                                          this.popState(); /* asgn */
-                                          this.popState(); /* fltr */
+                                          this.popState(); /* in: asgn */
+                                          this.popState(); /* in: fltr */
                                           return 'AND';
                                         }
 <loc>"or"                               {
-                                          this.popState(); /* asgn */
-                                          this.popState(); /* fltr */
+                                          this.popState(); /* in: asgn */
+                                          this.popState(); /* in: fltr */
                                           return 'OR';
+                                        }
+<loc>"order by"                         {
+                                          this.popState(); /* in: asgn */
+                                          this.popState(); /* in: fltr */
+                                          this.begin('ordby');
+                                          return 'ORDERBY';
+                                        }
+<ordby>"ASC"                            return 'ASC'
+<ordby>"DESC"                           return 'DESC'
+<ordby>{name}                           return 'NAME'
+<ordby>{escaped_name}                   {
+                                          yytext = yytext.slice(1, -1);
+                                          return 'NAME';
                                         }
 <INITIAL,loc><<EOF>>                    return 'EOF'
 

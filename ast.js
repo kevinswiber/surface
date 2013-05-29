@@ -1,8 +1,9 @@
 var Ast = {};
 
-Ast.SelectStatementNode = function(fieldListNode, filterNode) {
+Ast.SelectStatementNode = function(fieldListNode, filterNode, orderByNode) {
   this.fieldListNode = fieldListNode;
   this.filterNode = filterNode;
+  this.orderByNode = orderByNode;
   this.type = 'SelectStatement';
 };
 
@@ -71,6 +72,18 @@ Ast.CoordinatesNode = function(lattitude, longitude) {
   this.lattitude = lattitude;
   this.longitude = longitude;
   this.type = 'Coordinates';
+};
+
+Ast.OrderByNode = function(sortList) {
+  this.sortList = sortList;
+};
+
+Ast.SortListNode = function(initial) {
+  this.sorts = [initial];
+};
+
+Ast.SortListNode.prototype.push = function(item) {
+  this.sorts.push(item);
 };
 
 Object.keys(Ast).forEach(function(key) {

@@ -12,8 +12,8 @@ root
   ;
 
 select_statement
-  : SELECT fields where_clause
-    { $$ = new yy.SelectStatementNode($2, $3); }
+  : SELECT fields where_clause orderby_clause
+    { $$ = new yy.SelectStatementNode($2, $3, $4); }
   ; 
 
 fields
@@ -96,6 +96,30 @@ coordinates
   : NUMBER COMMA NUMBER
     { $$ = new yy.CoordinatesNode($1, $3); }
   ;
+
+orderby_clause
+  : /* empty */
+  | ORDERBY sort_list
+    { $$ = new yy.OrderByNode($2); }
+  ;
+
+sort_list
+  : sort 
+    { $$ = new yy.SortListNode($1); }
+  | sort_list COMMA sort
+    { $1.push($3); $$ = $1; }
+  ;
+
+sort
+  : NAME direction
+    { $$ = { field: $1, direction: ($2).toLowerCase() }; }
+  ;
+
+direction
+  : ASC
+  | DESC
+  ;
+
 
 literal
   : NUMBER
