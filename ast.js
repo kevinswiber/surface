@@ -76,10 +76,12 @@ Ast.CoordinatesNode = function(lattitude, longitude) {
 
 Ast.OrderByNode = function(sortList) {
   this.sortList = sortList;
+  this.type = 'OrderBy';
 };
 
 Ast.SortListNode = function(initial) {
   this.sorts = [initial];
+  this.type = 'SortList';
 };
 
 Ast.SortListNode.prototype.push = function(item) {
@@ -89,6 +91,7 @@ Ast.SortListNode.prototype.push = function(item) {
 Ast.SortNode = function(field, direction) {
   this.field = field;
   this.direction = direction.toLowerCase();
+  this.type = 'Sort';
 };
 
 Object.keys(Ast).forEach(function(key) {

@@ -7,6 +7,7 @@ var CouchVisitor = function(options) {
   this.disjunctions = [];
   this.andPredicates = [];
   this.orPredicates = [];
+  this.sorts = [];
   this.map = null;
 
   if (options && options.uri) {
@@ -25,7 +26,45 @@ CouchVisitor.prototype.build = function(ql) {
     headers: { 'Content-Type': 'application/json' }
   };
 
-  return function(cb) { request(opts, cb); };
+  if (!this.sorts) {
+    return function(cb) {
+      request(opts, function(err, res, body) {
+        if (body && typeof body === 'string') {
+          body = JSON.parse(body);
+        };
+
+        cb(err, res, body);
+      });
+    };
+  } else {
+    var that = this;
+    return function(cb) {
+      request(opts, function(err, res, body) {
+        if (body && typeof body === 'string') {
+          body = JSON.parse(body);
+        };
+        if (body.rows) {
+          that.sorts.forEach(function(sort) {
+            if (sort.direction === 'asc') {
+              body.rows = body.rows.sort(function(a, b) {
+                if (a.value[sort.field] > b.value[sort.field]) return 1;
+                if (a.value[sort.field] < b.value[sort.field]) return -1;
+                return 0;
+              });
+            } else if (sort.direction === 'desc') {
+              body.rows = body.rows.sort(function(a, b) {
+                if (a.value[sort.field] < b.value[sort.field]) return 1;
+                if (a.value[sort.field] > b.value[sort.field]) return -1;
+                return 0;
+              });
+            }
+          });
+        }
+
+        cb(err, res, body);
+      });
+    };
+  }
 };
 
 CouchVisitor.prototype.visit = function(node) {
@@ -34,7 +73,15 @@ CouchVisitor.prototype.visit = function(node) {
 
 CouchVisitor.prototype.visitSelectStatement = function(statement) {
   statement.fieldListNode.accept(this);
-  statement.filterNode.accept(this);
+  if (statement.filterNode) {
+    statement.filterNode.accept(this);
+  }
+
+  if (statement.orderByNode) {
+    statement.orderByNode.accept(this);
+  }
+
+  this.map = this.createView();
 };
 
 CouchVisitor.prototype.visitFieldList = function(fieldList) {
@@ -47,8 +94,6 @@ CouchVisitor.prototype.visitFilter = function(filterList) {
   } else {
     filterList.expression.accept(this);
   }
-
-  this.map = this.createView();
 };
 
 CouchVisitor.prototype.visitDisjunction = function(disjunction) {
@@ -63,6 +108,10 @@ CouchVisitor.prototype.visitDisjunction = function(disjunction) {
   if (!isRightPredicate) {
     disjunction.right.accept(this);
   }
+};
+
+CouchVisitor.prototype.visitOrderBy = function(orderBy) {
+  this.sorts = orderBy.sortList.sorts;
 };
 
 CouchVisitor.prototype.visitConjunction = function(conjunction) {
