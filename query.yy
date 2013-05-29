@@ -112,14 +112,13 @@ sort_list
 
 sort
   : NAME direction
-    { $$ = { field: $1, direction: ($2).toLowerCase() }; }
+    { $$ = new yy.SortNode($1, $2); }
   ;
 
 direction
   : ASC
   | DESC
   ;
-
 
 literal
   : NUMBER

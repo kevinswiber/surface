@@ -86,6 +86,11 @@ Ast.SortListNode.prototype.push = function(item) {
   this.sorts.push(item);
 };
 
+Ast.SortNode = function(field, direction) {
+  this.field = field;
+  this.direction = direction.toLowerCase();
+};
+
 Object.keys(Ast).forEach(function(key) {
   if (Ast.hasOwnProperty(key)) {
     Ast[key].prototype.accept = function(visitor) {

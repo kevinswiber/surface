@@ -124,7 +124,7 @@ case 31: this.$ = new yy.SortListNode($$[$0]);
 break;
 case 32: $$[$0-2].push($$[$0]); this.$ = $$[$0-2]; 
 break;
-case 33: this.$ = { field: $$[$0-1], direction: ($$[$0]).toLowerCase() }; 
+case 33: this.$ = new yy.SortNode($$[$0-1], $$[$0]); 
 break;
 }
 },
