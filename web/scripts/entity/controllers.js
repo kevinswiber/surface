@@ -1,7 +1,9 @@
 var EntityCtrls = {};
 
 EntityCtrls.MainEntityCtrl = function($scope, $http, entityParams) {
-  $scope.fetch = function() {
+  $scope.url = entityParams.url;
+
+  $scope.init = function() {
     $scope.main = {
       properties: [],
       entities: [],
@@ -10,7 +12,6 @@ EntityCtrls.MainEntityCtrl = function($scope, $http, entityParams) {
     };
 
     $http.get(entityParams.url).success(function(data, status, headers, config) {
-      console.log(data);
       if (typeof data === 'string') data = JSON.parse(data);
 
       angular.forEach(data.properties, function(value, key) {

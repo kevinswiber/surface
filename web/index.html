@@ -4,8 +4,9 @@
     <meta charset="utf-8" />
     <meta name="fragment" content="!" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+    <link href="styles/vendor/bootstrap-combined.min.css" rel="stylesheet">
     <link href="styles/web.css" rel="stylesheet" />
+    <script src="scripts/vendor/angular.min.js"></script>
   </head>
   <body>
 
@@ -29,25 +30,19 @@
     </div>
 
     <div class="container">
-      <h1>Explore data with Surface</h1>
+      <h1>Explore your data</h1>
 
-      <div id="control-panel" ng-controller="MainCtrl">
-        <form id="settings">
-          <label class="control-label" for="rootUrl">Root URL:</label>
-          <input type="text" size="60" class="input-xlarge" id="rootUrl" name="rootUrl" ng-model="params.rootUrl"/>
+<div id="control-panel" ng-controller="MainCtrl" ng-init="init()">
+  <form id="settings" class="form-inline">
+    <label class="control-label" for="rootUrl">Surface URL:</label>
+    <input type="text" size="60" class="input-xlarge" id="rootUrl" name="rootUrl" ng-model="params.rootUrl"/>
 
-          <label class="control-label" for="collection">Collection:</label>
-          <input type="text" size="45" id="collection" name="collection" ng-model="params.collection"/>
-
-          <label class="control-label" for="query">Query:</label>
-          <input type="text" size="100" class="input-xxlarge" id="query" name="query" ng-model="params.query"/><br/>
-
-          <input type="hidden" ng-model="params.route" />
-          <button class="btn btn-primary" ng-click="fetch(params)">Go</button>
-        </form>
-      </div>
-
-      <div ng-view></div>
+    <input type="hidden" ng-model="params.route" />
+    <button class="btn btn-primary" ng-click="fetchHome(params)">Go</button>
+  </form>
+</div>
+<div id="entity" siren-view />
+  <!--<div id="view" ng-view></div>-->
 
       <div id="entity-modal" class="modal hide fade" tabindex="-1" role="dialog"
        aria-labelledby="modal-label" aria-hidden="true">
@@ -72,11 +67,11 @@
 
     </div> <!-- /container -->
 
-    <script src="//code.jquery.com/jquery-1.9.1.min.js"></script>
-    <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
-    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.min.js"></script>
+    <script src="scripts/vendor/jquery-1.9.1.min.js"></script>
+    <script src="scripts/vendor/bootstrap.min.js"></script>
     <script src="scripts/entity/controllers.js"></script>
     <script src="scripts/entity/module.js"></script>
+    <script src="scripts/sirenView.js"></script>
     <script src="scripts/controllers.js"></script>
     <script src="scripts/app.js"></script>
   </body>

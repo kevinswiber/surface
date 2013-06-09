@@ -90,7 +90,7 @@ Ast.SortListNode.prototype.push = function(item) {
 
 Ast.SortNode = function(field, direction) {
   this.field = field;
-  this.direction = direction.toLowerCase();
+  this.direction = direction ? direction.toLowerCase() : 'asc';
   this.type = 'Sort';
 };
 

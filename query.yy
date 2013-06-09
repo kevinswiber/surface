@@ -104,19 +104,20 @@ orderby_clause
   ;
 
 sort_list
-  : sort 
+  : sort_expression 
     { $$ = new yy.SortListNode($1); }
-  | sort_list COMMA sort
+  | sort_list COMMA sort_expression
     { $1.push($3); $$ = $1; }
   ;
 
-sort
+sort_expression
   : NAME direction
     { $$ = new yy.SortNode($1, $2); }
   ;
 
 direction
-  : ASC
+  : /* empty */
+  | ASC
   | DESC
   ;
 
