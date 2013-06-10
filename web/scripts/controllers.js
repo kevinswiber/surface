@@ -1,100 +1,59 @@
 var SurfaceCtrls = {};
 
-SurfaceCtrls.MainCtrl = function($scope, $location, $http, $rootScope, $templateCache, appParams, homeParams) {
+SurfaceCtrls.MainCtrl = function($scope, $location, siren) {
   var search = $location.search();
+  var url;
   if (search.url) {
-    appParams.url = search.url;
+    url = search.url
+  }
+
+  console.log('in MainCtrl:', url);
+  if (url) {
+    siren.fetch(url);
   }
 
   $scope.init = function() {
-    var search = $location.search();
-    if (search.url) {
-      appParams.url = search.url;
-    }
-
-    console.log('running init');
-    if (!appParams.url) {
-      return;
-    }
-
-    console.log(appParams.url);
-
-    $http.get(appParams.url).success(function(data, status, headers, config) {
-      appParams.entity = data;
-      console.log(data);
-console.log('broadcasting entityChangeSuccess');
-      $rootScope.$broadcast('entityChangeSuccess', appParams.entity);
-
-      /*if (data.class) {
-        var router = { 'home': 'partials/home.html' };
-        angular.forEach(data['class'], function(klass) {
-          if (router[klass]) {
-            var cacheId = router[klass];
-            var template = $templateCache.get(cacheId);
-            //if (!template) {
-              $http.get(cacheId).success(function(tmpl, status, headers, config) {
-                //$templateCache.put(cacheId, tmpl);
-                var compiled = $compile(tmpl)($scope);
-                $('#view').html(compiled);
-              });
-            //}
-          };
-        });
-      }*/
-    });
-  };
-
-  $scope.params = {
-    rootUrl: 'http://localhost:3000',
-    route: '/search'
+    $scope.params = { rootUrl: url || 'http://localhost:3000' };
   };
 
   $scope.fetchHome = function(params) {
-    homeParams.url = params.rootUrl;
+    console.log('in fetch home');
     $location.path('/');
-    $location.search({ url: homeParams.url });
-    $scope.init();
+    $location.search({ url: params.rootUrl });
+    siren.fetch(params.rootUrl);
+    console.log('siren.current', siren.current);
   };
 };
 
-SurfaceCtrls.HomeCtrl = function($scope, $http, $location, $rootScope,
-    homeParams, searchParams, entityParams, appParams) {
-  $scope.model = searchParams;
-  $scope.fields = {};
-
+SurfaceCtrls.HomeCtrl = function($scope, $location, siren) {
   $scope.init = function() {
-console.log('home init');
-    if (!homeParams.url) {
-      if ($location.search().url) {
-        homeParams.url = $location.search().url;
+    $scope.model = {};//searchParams;
+    $scope.fields = {};
+
+    $scope.model.url = $location.search().url;
+    //$scope.model.url = homeParams.url;
+
+    var data = siren.current;
+    console.log(data);
+    angular.forEach(data.actions, function(action) {
+      if (action.name === 'search') {
+        angular.forEach(action.fields, function(field) {
+          $scope.fields[field.name] = field;
+        });
       }
+    });
+
+    if (!$scope.model.collection || $scope.model.collection === '') {
+      $scope.model.collection = $scope.fields.collection.value[0];
     }
 
-    $scope.model.url = homeParams.url;
+    if (!$scope.model.query || $scope.model.query === '') {
+      $scope.model.query = $scope.fields.query.value;
+    }
 
-    //$http.get(homeParams.url).success(function(data, status, headers, config) {
-    console.log(appParams);
-    var data = appParams.entity;
-      angular.forEach(data.actions, function(action) {
-        if (action.name === 'search') {
-          angular.forEach(action.fields, function(field) {
-            $scope.fields[field.name] = field;
-          });
-        }
-      });
-
-      if (!$scope.model.collection || $scope.model.collection === '') {
-        $scope.model.collection = $scope.fields.collection.value[0];
-      }
-
-      if (!$scope.model.query || $scope.model.query === '') {
-        $scope.model.query = $scope.fields.query.value;
-      }
-
-      searchParams.collection = $scope.model.collection;
-      searchParams.query = $scope.model.query;
-      console.log(searchParams);
-    //});
+    //searchParams.collection = $scope.model.collection;
+    //searchParams.query = $scope.model.query;
+    //console.log(searchParams);
   };
 
   $scope.search = function(params) {
@@ -116,16 +75,9 @@ console.log('home init');
       url += '?query=' + encodeURIComponent(query);
     }
 
-    appParams.url = url;
-    entityParams.url = url;
-    $location.path('/search');
+    $location.path('/');
     $location.search({ url: url });
-    $http.get(appParams.url).success(function(data, status, headers, config) {
-      appParams.entity = data;
-      console.log(data);
-      console.log('broadcasting entityChangeSuccess');
-      $rootScope.$broadcast('entityChangeSuccess', appParams.entity);
-    });
+    siren.fetch(url);
   };
 };
 

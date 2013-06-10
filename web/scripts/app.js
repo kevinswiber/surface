@@ -20,43 +20,33 @@ var SirenRouteProvider = function() {
 
           reload: function() {
             forceReload = true;
-            console.log('RELOADING');
             $rootScope.$evalAsync(updateRoute);
           }
         };
 
-console.log('assigning root scope.');
       $rootScope.$on('entityChangeSuccess', updateRoute);
       return entityRoute;
 
       function updateRoute(e, entity) {
-console.log('in updateRoute!');
+        console.log('in updateRoute!');
         var next = parseRoute(entity),
             last = entityRoute.current;
 
-        console.log(entity);
-        console.log(next);
-        console.log(last);
+        console.log('entity:', entity);
+        console.log('next:', next);
+        console.log('last:', last);
         if (next && last && next.$entityRoute === last.$entityRoute
             && angular.equals(next.pathParams, last.pathParams) && !next.reloadOnSearch && !forceReload) {
           last.params = next.params;
-          //angular.copy(last.params, $routeParams);
+          console.log('next && last');
           $rootScope.$broadcast('entityUpdate', last);
         } else if (next || last) {
+          console.log('next || last');
           forceReload = false;
           $rootScope.$broadcast('entityChangeStart', next, last);
           entityRoute.current = next;
-          /*if (next) {
-            if (next.redirectTo) {
-              if (isString(next.redirectTo)) {
-                $location.path(interpolate(next.redirectTo, next.params)).search(next.params)
-                         .replace();
-              } else {
-                $location.url(next.redirectTo(next.pathParams, $location.path(), $location.search()))
-                         .replace();
-              }
-            }
-          }*/
+
+          console.log('typeof next:', typeof(next));
 
           $q.when(next).
             then(function() {
@@ -69,10 +59,12 @@ console.log('in updateRoute!');
                 });
 
                 if (angular.isDefined(template = next.template)) {
+                  console.log('template');
                   if (angular.isFunction(template)) {
                     template = template(next.params);
                   }
                 } else if (angular.isDefined(template = next.templateUrl)) {
+                  console.log('templateUrl');
                   if (angular.isFunction(template)) {
                     template = template(next.params);
                   }
@@ -85,6 +77,7 @@ console.log('in updateRoute!');
                 if (angular.isDefined(template)) {
                   locals['$template'] = template;
                 }
+                console.log('locals $template', locals['$template']);
                 return $q.all(locals);
               }
             }).
@@ -161,12 +154,6 @@ angular
   .module('surface', ['entity'])
   .provider('sirenRoute', SirenRouteProvider)
   .config(['sirenRouteProvider', function(sirenRouteProvider) {
-console.log('configuring siren view provider');
-    /*$routeProvider.when('/', {
-      templateUrl: 'partials/start.html',
-      controller: 'MainCtrl'
-    });
-    $routeProvider.otherwise({ redirectTo: '/' });*/
     sirenRouteProvider.when(['home'], {
       templateUrl: 'partials/home.html',
       controller: 'HomeCtrl'
@@ -176,23 +163,9 @@ console.log('configuring siren view provider');
       controller: 'SearchCtrl'
     });
   }])
-  /*.config(['$routeProvider', function($routeProvider) {
-    $routeProvider.otherwise({ redirectTo: '/' });
-    $routeProvider.when('/home', {
-      templateUrl: 'partials/home.html',
-      controller: 'HomeCtrl'
-    });
-    $routeProvider.when('/search', {
-      templateUrl: 'partials/search.html',
-      controller: 'SearchCtrl'
-    });
-    $routeProvider.otherwise({ redirectTo: '/' });
-  }])*/
   .directive('sirenView', sirenViewDirective)
-  .controller('MainCtrl', ['$scope', '$location',
-      '$http', '$rootScope', '$templateCache', 'appParams', 'homeParams', SurfaceCtrls.MainCtrl])
-  .controller('HomeCtrl', ['$scope', '$http', '$location', '$rootScope',
-      'homeParams', 'searchParams', 'entityParams', 'appParams', SurfaceCtrls.HomeCtrl])
+  .controller('MainCtrl', ['$scope', '$location', 'siren', SurfaceCtrls.MainCtrl])
+  .controller('HomeCtrl', ['$scope', '$location', 'siren', SurfaceCtrls.HomeCtrl])
   .controller('SearchCtrl', ['$scope', '$location', 
       'entityParams', SurfaceCtrls.SearchCtrl])
   .factory('appParams', function() {
