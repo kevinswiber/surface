@@ -1,6 +1,6 @@
 var EntityCtrls = {};
 
-EntityCtrls.MainEntityCtrl = function($scope, $http, entityParams) {
+EntityCtrls.MainEntityCtrl = function($scope, $http, siren, entityParams) {
   $scope.url = entityParams.url;
 
   $scope.init = function() {
@@ -11,7 +11,11 @@ EntityCtrls.MainEntityCtrl = function($scope, $http, entityParams) {
       links: []
     };
 
-    $http.get(entityParams.url).success(function(data, status, headers, config) {
+    siren.fetch(entityParams.url, entityParams.params).then(function(data) {
+      showData(data);
+    });
+
+    function showData(data) {
       if (typeof data === 'string') data = JSON.parse(data);
 
       angular.forEach(data.properties, function(value, key) {
@@ -51,7 +55,7 @@ EntityCtrls.MainEntityCtrl = function($scope, $http, entityParams) {
           });
         });
       }
-    });
+    }
   };
 };
 

@@ -32,41 +32,12 @@
     <div class="container">
       <h1>Explore your data</h1>
 
-<div id="control-panel" ng-controller="MainCtrl" ng-init="init()">
-  <form id="settings" class="form-inline">
-    <label class="control-label" for="rootUrl">Surface URL:</label>
-    <input type="text" size="60" class="input-xlarge" id="rootUrl" name="rootUrl" ng-model="params.rootUrl"/>
-
-    <button class="btn btn-primary" ng-click="fetchHome(params)">Go</button>
-  </form>
-</div>
-<div id="entity" siren-view />
-  <!--<div id="view" ng-view></div>-->
-
-      <div id="entity-modal" class="modal hide fade" tabindex="-1" role="dialog"
-       aria-labelledby="modal-label" aria-hidden="true">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
-          <h3 id="modal-label">Entity</h3>
-        </div>
-        <div class="modal-body">
-          <div id="modal-properties">
-          </div>
-          <div id="modal-entities">
-          </div>
-          <div id="modal-actions">
-          </div>
-          <div id="modal-links">
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Close</button>
-        </div>
-      </div>
+      <div ui-view></div>
 
     </div> <!-- /container -->
 
     <script src="scripts/vendor/jquery-1.9.1.min.js"></script>
+    <script src="scripts/vendor/angular-ui-router.min.js"></script>
     <script src="scripts/vendor/bootstrap.min.js"></script>
     <script src="scripts/entity/controllers.js"></script>
     <script src="scripts/entity/module.js"></script>
