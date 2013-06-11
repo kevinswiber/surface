@@ -33,9 +33,6 @@ console.log('clearing content');
 console.log('on update');
         var locals = sirenRoute.current && sirenRoute.current.locals,
             template = locals && locals.$template;
-console.log(sirenRoute.current);
-console.log(locals);
-console.log(template);
 
         if (template) {
           clearContent();
