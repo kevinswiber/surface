@@ -136,6 +136,7 @@ var sirenify = function(url, collectionPath, body) {
   };
 
   skeleton.links.push({ rel: ['self'], href: url });
+  skeleton.links.push({ rel: ['contents'], href: baseUri });
 
   skeleton.properties.count = body.total_rows || 0;
 
@@ -158,7 +159,7 @@ var sirenifyItem = function(collectionPath, row) {
    };
    entity.links.push({ rel: ['self'], href: baseUri + collectionPath + row.id });
    entity.links.push({ rel: ['edit'], href: baseUri + collectionPath + row.id + '?edit' });
-   entity.links.push({ rel: ['collection'], href: baseUri + collectionPath });
+   entity.links.push({ rel: ['collection'], href: (baseUri + collectionPath).slice(0, -1) });
 
    Object.keys(row.value).forEach(function(prop) {
      entity.properties[prop] = row.value[prop];

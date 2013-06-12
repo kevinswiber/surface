@@ -2,8 +2,8 @@ angular
   .module('surface', ['ui.state', 'entity'])
   .config(['sirenStateProvider', function(sirenState) {
     sirenState
-      .map(['home'], 'home')
-      .map(['search-results'], 'search');
+      .when(['home'], 'home')
+      .otherwise('entity');
   }])
   .config(['$stateProvider', function($stateProvider) {
     $stateProvider
@@ -17,19 +17,19 @@ angular
         templateUrl: 'partials/home.html',
         controller: 'HomeCtrl'
       })
-      .state('search', {
-        url: '/search?url&collection&query',
-        templateUrl: 'partials/search.html',
-        controller: 'SearchCtrl'
+      .state('entity', {
+        url: '/entity?url&collection&query',
+        templateUrl: 'partials/entity.html',
+        controller: 'EntityCtrl'
       });
   }])
-  .controller('MainCtrl', ['$scope', '$state', 'siren', 'appParams', SurfaceCtrls.MainCtrl])
-  .controller('HomeCtrl', ['$scope', '$state', 'siren', 'homeParams', SurfaceCtrls.HomeCtrl])
-  .controller('SearchCtrl', ['$scope', '$state', 'siren',
-      'entityParams', SurfaceCtrls.SearchCtrl])
-  .factory('appParams', function() {
-    return { entity: {}, url: '' };
-  })
-  .factory('homeParams', function() {
+  .controller('MainCtrl', ['$scope', '$state', 'siren', 'appState', SurfaceCtrls.MainCtrl])
+  .controller('HomeCtrl', ['$scope', '$state', 'siren', 'appState', SurfaceCtrls.HomeCtrl])
+  .controller('EntityCtrl', ['$scope', '$state', 'siren',
+      SurfaceCtrls.EntityCtrl])
+  .factory('appState', function() {
     return { url: '', collection: '', query: '' };
+  })
+  .filter('encodeURIComponent', function() {
+    return window.encodeURIComponent;
   });

@@ -24,7 +24,7 @@
           <h4>Links</h4>
           <ul>
             <li ng-repeat="link in entity.links">
-            <a href="#entity-modal" data-toggle="modal" data-href="{{ link.href }}"
+            <a ng-href="#/entity?url={{ link.href | encodeURIComponent }}"
              class="entity-link {{ link.rel }}">{{ link.rel }}</a>
             </li>
           </ul>
@@ -38,7 +38,7 @@
     <h3>Links</h3>
     <ul>
       <li ng-repeat="link in main.links">
-      <a href="#entity-modal" data-toggle="modal" data-href="{{ link.href }}"
+      <a ng-href="#/entity?url={{ link.href | encodeURIComponent }}"
        class="entity-link {{ link.rel }}">{{ link.rel }}</a>
       </li>
     </ul>

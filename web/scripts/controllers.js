@@ -1,28 +1,28 @@
 var SurfaceCtrls = {};
 
-SurfaceCtrls.MainCtrl = function($scope, $state, siren, appParams) {
+SurfaceCtrls.MainCtrl = function($scope, $state, siren, appState) {
   $scope.init = function() {
-    $scope.params = { url: appParams.url || '' };
+    $scope.params = { url: appState.url || '' };
   };
 
   $scope.fetchUrl = function(params) {
     var url = params.url;
-    appParams.url = url;
+    appState.url = url;
     siren.transitionTo(url, { url: url });
   };
 };
 
-SurfaceCtrls.HomeCtrl = function($scope, $state, siren, homeParams) {
+SurfaceCtrls.HomeCtrl = function($scope, $state, siren, appState) {
   $scope.init = function() {
     $scope.model = { collection: null, query: null };
     $scope.fields = {};
 
     $scope.model.url = $state.params.url;
 
-    if (!$scope.model.url || $scope.model.url === homeParams.url) {
-      $scope.model.url = homeParams.url;
-      $scope.model.collection = homeParams.collection;
-      $scope.model.query = homeParams.query;
+    if (!$scope.model.url || $scope.model.url === appState.url) {
+      $scope.model.url = appState.url;
+      $scope.model.collection = appState.collection;
+      $scope.model.query = appState.query;
     }
 
     siren.fetch($state.params.url, $state.params).then(function(data) {
@@ -45,9 +45,9 @@ SurfaceCtrls.HomeCtrl = function($scope, $state, siren, homeParams) {
   };
 
   $scope.search = function(params) {
-    var rootUrl = homeParams.url = params.url;
-    var collection = homeParams.collection = params.collection;
-    var query = homeParams.query = params.query;
+    var rootUrl = appState.url = params.url;
+    var collection = appState.collection = params.collection;
+    var query = appState.query = params.query;
 
     var url = '';
     if (rootUrl) {
@@ -67,7 +67,7 @@ SurfaceCtrls.HomeCtrl = function($scope, $state, siren, homeParams) {
   };
 };
 
-SurfaceCtrls.SearchCtrl = function($scope, $state, siren, entityParams) {
+SurfaceCtrls.EntityCtrl = function($scope, $state, siren) {
   $scope.init = function() {
     var params = $state.params;
     var rootUrl = params.url;
@@ -88,10 +88,6 @@ SurfaceCtrls.SearchCtrl = function($scope, $state, siren, entityParams) {
       url += '?query=' + encodeURIComponent(query);
     }
 
-    entityParams.params = params;
-    entityParams.url = url;
-    siren.fetch(url, params).then(function(data) {
-      entityParams.entity = data;
-    });
+    siren.fetch(url, params);
   };
 };
