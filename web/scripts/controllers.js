@@ -1,6 +1,6 @@
 var SurfaceCtrls = {};
 
-SurfaceCtrls.MainCtrl = function($scope, $state, siren, appState) {
+SurfaceCtrls.MainCtrl = function($scope, $state, navigator, appState) {
   $scope.init = function() {
     $scope.params = { url: appState.url || '' };
   };
@@ -8,11 +8,11 @@ SurfaceCtrls.MainCtrl = function($scope, $state, siren, appState) {
   $scope.fetchUrl = function(params) {
     var url = params.url;
     appState.url = url;
-    siren.transitionTo(url, { url: url });
+    navigator.transitionTo(url, { url: url });
   };
 };
 
-SurfaceCtrls.HomeCtrl = function($scope, $state, siren, appState) {
+SurfaceCtrls.HomeCtrl = function($scope, $state, navigator, appState) {
   $scope.init = function() {
     $scope.model = { collection: null, query: null };
     $scope.fields = {};
@@ -25,7 +25,7 @@ SurfaceCtrls.HomeCtrl = function($scope, $state, siren, appState) {
       $scope.model.query = appState.query;
     }
 
-    siren.fetch($state.params.url, $state.params).then(function(data) {
+    navigator.fetch($state.params.url, $state.params).then(function(data) {
       angular.forEach(data.actions, function(action) {
         if (action.name === 'search') {
           angular.forEach(action.fields, function(field) {
@@ -49,31 +49,27 @@ SurfaceCtrls.HomeCtrl = function($scope, $state, siren, appState) {
     var collection = appState.collection = params.collection;
     var query = appState.query = params.query;
 
-    var url = '';
-    if (rootUrl) {
-      url += rootUrl;
-    }
-    if (collection) {
-      if (url.slice(-1) === '/') {
-        url = url.slice(0, -1);
-      }
-      url += '/' + encodeURIComponent(collection);
-    }
-    if (query) {
-      url += '?query=' + encodeURIComponent(query);
-    }
+    var url = SurfaceCtrls.Common.buildUrl(rootUrl, collection, query);
 
-    siren.transitionTo(url, { url: rootUrl, collection: collection, query: query });
+    navigator.transitionTo(url, params);
   };
 };
 
-SurfaceCtrls.EntityCtrl = function($scope, $state, siren) {
+SurfaceCtrls.EntityCtrl = function($scope, $state, navigator) {
   $scope.init = function() {
     var params = $state.params;
     var rootUrl = params.url;
     var collection = params.collection;
     var query = params.query;
 
+    var url = SurfaceCtrls.Common.buildUrl(rootUrl, collection, query);
+
+    navigator.fetch(url, params);
+  };
+};
+
+SurfaceCtrls.Common = {
+  buildUrl: function(rootUrl, collection, query) {
     var url = '';
     if (rootUrl) {
       url += rootUrl;
@@ -88,6 +84,6 @@ SurfaceCtrls.EntityCtrl = function($scope, $state, siren) {
       url += '?query=' + encodeURIComponent(query);
     }
 
-    siren.fetch(url, params);
-  };
+    return url;
+  }
 };

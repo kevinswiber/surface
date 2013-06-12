@@ -1,7 +1,7 @@
 angular
-  .module('surface', ['ui.state', 'entity'])
-  .config(['sirenStateProvider', function(sirenState) {
-    sirenState
+  .module('surface', ['ui.state', 'siren'])
+  .config(['classRouterProvider', function(classRouterProvider) {
+    classRouterProvider
       .when(['home'], 'home')
       .otherwise('entity');
   }])
@@ -23,10 +23,12 @@ angular
         controller: 'EntityCtrl'
       });
   }])
-  .controller('MainCtrl', ['$scope', '$state', 'siren', 'appState', SurfaceCtrls.MainCtrl])
-  .controller('HomeCtrl', ['$scope', '$state', 'siren', 'appState', SurfaceCtrls.HomeCtrl])
-  .controller('EntityCtrl', ['$scope', '$state', 'siren',
-      SurfaceCtrls.EntityCtrl])
+  .controller('MainCtrl',
+      ['$scope', '$state', 'navigator', 'appState', SurfaceCtrls.MainCtrl])
+  .controller('HomeCtrl',
+      ['$scope', '$state', 'navigator', 'appState', SurfaceCtrls.HomeCtrl])
+  .controller('EntityCtrl',
+      ['$scope', '$state', 'navigator', SurfaceCtrls.EntityCtrl])
   .factory('appState', function() {
     return { url: '', collection: '', query: '' };
   })

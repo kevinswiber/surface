@@ -1,11 +1,11 @@
 angular
-  .module('entity', ['ui.state'])
-  .controller('MainEntityCtrl',
-      ['$scope', '$http', 'siren', 'entityParams', EntityCtrls.MainEntityCtrl])
-  .factory('entityParams', function() {
+  .module('siren', ['ui.state'])
+  .controller('SirenEntityCtrl',
+      ['$scope', '$http', 'navigator', 'apiState', SirenCtrls.SirenEntityCtrl])
+  .factory('apiState', function() {
     return { url: '', entity: {} };
   })
-  .provider('sirenState', function() {
+  .provider('classRouter', function() {
       var map = {};
 
       this.when = function(klass, state) {
@@ -27,18 +27,18 @@ angular
         };
       };
   })
-  .factory('siren', ['$http', '$rootScope', '$q', '$state', 'sirenState', 'entityParams',
-      function($http, $rootScope, $q, $state, sirenState, entityParams) {
+  .factory('navigator', ['$http', '$rootScope', '$q', '$state', 'classRouter', 'apiState',
+      function($http, $rootScope, $q, $state, classRouter, apiState) {
     return {
       cache: [],
       current: null,
       fetch: function(url, params) {
-        entityParams.url = url;
-        entityParams.params = params;
+        apiState.url = url;
+        apiState.params = params;
 
         if (this.cache.length) {
           this.current = this.cache.pop();
-          entityParams.entity = this.current;
+          apiState.entity = this.current;
           return $q.when(this.current);
         }
 
@@ -52,11 +52,11 @@ angular
         var self = this;
         var deferred = $q.defer();
 
-        entityParams.url = url;
-        entityParams.params = params;
+        apiState.url = url;
+        apiState.params = params;
 
         $http.get(url).success(function(data, status, headers, config) {
-          entityParams.entity = data;
+          apiState.entity = data;
 
           if (!avoidCache) {
             self.cache.push(data);
@@ -65,7 +65,7 @@ angular
 
           $rootScope.$broadcast('entityChangeSuccess', data);
 
-          var state = sirenState.resolve(data.class);
+          var state = classRouter.resolve(data.class);
 
           $state.transitionTo(state, params);
           deferred.resolve(data);

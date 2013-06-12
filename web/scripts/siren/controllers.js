@@ -1,7 +1,7 @@
-var EntityCtrls = {};
+var SirenCtrls = {};
 
-EntityCtrls.MainEntityCtrl = function($scope, $http, siren, entityParams) {
-  $scope.url = entityParams.url;
+SirenCtrls.SirenEntityCtrl = function($scope, $http, navigator, apiState) {
+  $scope.url = apiState.url;
 
   $scope.init = function() {
     $scope.main = {
@@ -11,7 +11,7 @@ EntityCtrls.MainEntityCtrl = function($scope, $http, siren, entityParams) {
       links: []
     };
 
-    siren.fetch(entityParams.url, entityParams.params).then(function(data) {
+    navigator.fetch(apiState.url, apiState.params).then(function(data) {
       showData(data);
     });
 
