@@ -201,6 +201,8 @@ CouchVisitor.prototype.createView = function() {
   var prefix = 'function(doc) { if (';
   var postfix = ') { emit(doc._id,' + emitStr + '); } }';
 
+  str = str || 'true';
+
   var map = prefix + str + postfix;
 
   return map;

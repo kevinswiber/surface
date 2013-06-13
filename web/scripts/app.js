@@ -1,5 +1,5 @@
 angular
-  .module('surface', ['ui.state', 'siren'])
+  .module('surface', ['siren', 'ui.state', 'ui.bootstrap'])
   .config(['classRouterProvider', '$stateProvider',
       function(classRouterProvider, $stateProvider) {
 
@@ -31,7 +31,7 @@ angular
   .controller('HomeCtrl',
       ['$scope', '$state', 'navigator', 'appState', SurfaceCtrls.HomeCtrl])
   .controller('EntityCtrl',
-      ['$scope', '$state', 'navigator', SurfaceCtrls.EntityCtrl])
+      ['$scope', '$state', '$location', 'navigator', SurfaceCtrls.EntityCtrl])
   .factory('appState', function() {
     return { url: '', collection: '', query: '' };
   })

@@ -40,8 +40,7 @@ where_clause
   ;
 
 filter
-  : /* empty */
-  | conjunction
+  : conjunction
   | disjunction
   | predicate
   ;

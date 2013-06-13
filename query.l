@@ -49,7 +49,11 @@ escaped_name  \[(?:(?!\])[^\\]|\\.)*\]
                                           return 'NAME';
                                         }
 <asgn>"eq"|"gt"|"lt"|"gte"|"lte"        return 'COMPARISON'
-<asgn>"="|">"|"<"|">="|"<="             {
+<asgn>">="|"<="                         {
+                                          yytext = letterify(yytext);
+                                          return 'COMPARISON';
+                                        }
+<asgn>"="|">"|"<"                       {
                                           yytext = letterify(yytext);
                                           return 'COMPARISON';
                                         }

@@ -55,45 +55,74 @@ SurfaceCtrls.HomeCtrl = function($scope, $state, navigator, appState) {
   };
 };
 
-SurfaceCtrls.EntityCtrl = function($scope, $state, navigator) {
+SurfaceCtrls.EntityCtrl = function($scope, $state, $location, navigator) {
   $scope.init = function() {
     var params = $state.params;
     var rootUrl = params.url;
     var collection = params.collection;
     var query = params.query;
 
+    follow(rootUrl, collection, query);
+  };
+
+  $scope.go = function(url) {
+    $state.transitionTo('entity', { url: url });
+  };
+
+  var follow = function(rootUrl, collection, query) {
     var url = SurfaceCtrls.Common.buildUrl(rootUrl, collection, query);
 
     $scope.main = {
       properties: [],
       entities: [],
-      actions: [],
       links: []
     };
 
+    $scope.isOneAtATime = true;
     $scope.url = url;
 
-    navigator.redirectOrFetch(url, params).then(function(data) {
+    $state.params.url = url;
+    $state.params.collection = collection;
+    $state.params.query = query;
+
+    navigator.redirectOrFetch(url, $state.params).then(function(data) {
       showData(data);
     });
 
     function showData(data) {
       if (typeof data === 'string') data = JSON.parse(data);
 
-      angular.forEach(data.properties, function(value, key) {
+      /*angular.forEach(data.properties, function(value, key) {
         $scope.main.properties.push({ key: key, value: value });
-      });
+      });*/
+
+      $scope.main.properties = JSON.stringify(data.properties, null, 2);
+      $scope.main.class = JSON.stringify(data.class);
+      $scope.main.actions = data.actions;
 
       if (data.entities) {
         angular.forEach(data.entities, function(entity) {
-          if (entity.properties) {
+          entity.properties = JSON.stringify(entity.properties, null, 2);
+          /*if (entity.properties) {
             var properties = []
             angular.forEach(entity.properties, function(value, key) {
               properties.push({ key: key, value: value });
             });
 
             entity.properties = properties;
+          }*/
+
+          var heading = [];
+
+          if (entity.class) {
+            heading.push('class: ' + JSON.stringify(entity.class));
           }
+
+          if (entity.rel) {
+            heading.push('rel: ' + JSON.stringify(entity.rel));
+          }
+
+          entity.heading = heading.join(', ') || '[unknown class]';
 
           if (entity.links) {
             var links = [];
