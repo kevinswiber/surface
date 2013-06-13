@@ -2,7 +2,7 @@
   <em>{{ model.url }}</em><br/><br/>
   <form>
     <label class="control-label" for="collection">Collection:</label>
-    <select name="collection" id="collection" ng-model="model.collection" ng-options="c for c in fields.collection.value"></select>
+    <select autofocus name="collection" id="collection" ng-model="model.collection" ng-options="c for c in fields.collection.value"></select>
 
     <label class="control-label" for="query">Query:</label>
     <input type="text" size="100" class="input-xxlarge" id="query" name="query" ng-model="model.query"/><br/>

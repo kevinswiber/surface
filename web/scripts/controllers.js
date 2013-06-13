@@ -17,13 +17,11 @@ SurfaceCtrls.HomeCtrl = function($scope, $state, navigator, appState) {
     $scope.model = { collection: null, query: null };
     $scope.fields = {};
 
-    $scope.model.url = $state.params.url;
+    $scope.model.url = appState.url = $state.params.url;
 
-    if (!$scope.model.url || $scope.model.url === appState.url) {
-      $scope.model.url = appState.url;
-      $scope.model.collection = appState.collection;
-      $scope.model.query = appState.query;
-    }
+    $scope.model.url = appState.url;
+    $scope.model.collection = appState.collection;
+    $scope.model.query = appState.query;
 
     navigator.fetch($state.params.url, $state.params).then(function(data) {
       angular.forEach(data.actions, function(action) {
@@ -44,14 +42,16 @@ SurfaceCtrls.HomeCtrl = function($scope, $state, navigator, appState) {
     });
   };
 
-  $scope.search = function(params) {
-    var rootUrl = appState.url = params.url;
-    var collection = appState.collection = params.collection;
-    var query = appState.query = params.query;
+  $scope.search = function(fields) {
+    var rootUrl = appState.url = fields.url;
+    var collection = appState.collection = fields.collection;
+    var query = appState.query = fields.query;
 
     var url = SurfaceCtrls.Common.buildUrl(rootUrl, collection, query);
+    
+    var params = fields;
 
-    navigator.transitionTo(url, params);
+    navigator.execute('search', fields, params);
   };
 };
 
@@ -64,7 +64,60 @@ SurfaceCtrls.EntityCtrl = function($scope, $state, navigator) {
 
     var url = SurfaceCtrls.Common.buildUrl(rootUrl, collection, query);
 
-    navigator.fetch(url, params);
+    $scope.main = {
+      properties: [],
+      entities: [],
+      actions: [],
+      links: []
+    };
+
+    $scope.url = url;
+
+    navigator.redirectOrFetch(url, params).then(function(data) {
+      showData(data);
+    });
+
+    function showData(data) {
+      if (typeof data === 'string') data = JSON.parse(data);
+
+      angular.forEach(data.properties, function(value, key) {
+        $scope.main.properties.push({ key: key, value: value });
+      });
+
+      if (data.entities) {
+        angular.forEach(data.entities, function(entity) {
+          if (entity.properties) {
+            var properties = []
+            angular.forEach(entity.properties, function(value, key) {
+              properties.push({ key: key, value: value });
+            });
+
+            entity.properties = properties;
+          }
+
+          if (entity.links) {
+            var links = [];
+            angular.forEach(entity.links, function(link) {
+              angular.forEach(link.rel, function(rel) {
+                links.push({ rel: rel, href: link.href });
+              });
+            });
+
+            entity.links = links;
+          }
+
+          $scope.main.entities.push(entity);
+        });
+      };
+
+      if (data.links) {
+        angular.forEach(data.links, function(link) {
+          angular.forEach(link.rel, function(rel) {
+            $scope.main.links.push({ rel: rel, href: link.href });
+          });
+        });
+      }
+    }
   };
 };
 

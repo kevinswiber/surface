@@ -1,21 +1,16 @@
 angular
   .module('siren', ['ui.state'])
-  .controller('SirenEntityCtrl',
-      ['$scope', '$http', 'navigator', 'apiState', SirenCtrls.SirenEntityCtrl])
-  .factory('apiState', function() {
-    return { url: '', entity: {} };
-  })
   .provider('classRouter', function() {
       var map = {};
 
       this.when = function(klass, state) {
         var c = klass.sort().join(' ');
-        map[c] = state;
+        map[c] = { known: true, state: state };
         return this;
       };
       
       this.otherwise = function(state) {
-        map[null] = state;
+        map[null] = { known: false, state: state };
       };
 
       this.$get = function() {
@@ -27,24 +22,25 @@ angular
         };
       };
   })
-  .factory('navigator', ['$http', '$rootScope', '$q', '$state', 'classRouter', 'apiState',
-      function($http, $rootScope, $q, $state, classRouter, apiState) {
+  .factory('navigator', ['$http', '$rootScope', '$q', '$state', 'classRouter',
+      function($http, $rootScope, $q, $state, classRouter) {
     return {
       cache: [],
       current: null,
-      fetch: function(url, params) {
-        apiState.url = url;
-        apiState.params = params;
-
+      redirectOrFetch: function(url, params) {
+        return this.fetch(url, params, true);
+      },
+      fetch: function(url, params, redirectIfKnown) {
         if (this.cache.length) {
           this.current = this.cache.pop();
-          apiState.entity = this.current;
-          return $q.when(this.current);
+          return $q.when(this.current.entity);
         }
 
-        return this.transitionTo(url, params, true);
+        var immediateReturn = true;
+
+        return this.transitionTo(url, params, immediateReturn, redirectIfKnown);
       },
-      transitionTo: function(url, params, avoidCache) {
+      transitionTo: function(url, params, immediateReturn, redirectIfKnown) {
         if (typeof url === 'object' && url.href) {
           url = url.href;
         }
@@ -52,26 +48,72 @@ angular
         var self = this;
         var deferred = $q.defer();
 
-        apiState.url = url;
-        apiState.params = params;
-
         $http.get(url).success(function(data, status, headers, config) {
-          apiState.entity = data;
-
-          if (!avoidCache) {
-            self.cache.push(data);
-            self.current = data;
-          }
-
-          $rootScope.$broadcast('entityChangeSuccess', data);
-
           var state = classRouter.resolve(data.class);
 
-          $state.transitionTo(state, params);
-          deferred.resolve(data);
+          self.current = { state: state, entity: data };
+
+          // only cache if the following state must fetch.
+          if (!immediateReturn || (redirectIfKnown && state.known)) {
+            self.cache.push(self.current);
+          }
+          
+          $rootScope.$broadcast('entityChangeSuccess', data);
+
+          $state.transitionTo(state.state, params);
+
+          var stateIsUnknown = !state.known;
+          var resolveIfKnown = !redirectIfKnown;
+          
+          
+          if (immediateReturn && (stateIsUnknown || resolveIfKnown)) {
+            deferred.resolve(data);
+          }
         });
 
-        return deferred.promise;
+        if (immediateReturn) {
+          return deferred.promise;
+        }
+      },
+      execute: function(name, fields, stateParams, redirectIfKnown) {
+        var action;
+        angular.forEach(this.current.entity.actions, function(a) {
+          if (a.name === name) {
+            action = a;
+          }
+        });
+
+        if (action) {
+          var deferred = $q.defer();
+
+          var config = {
+            method: action.method || 'GET',
+            url: action.href
+          };
+
+          if (config.method === 'GET') {
+            config.params = fields;
+          } else {
+            config.data = fields;
+          }
+
+          var self = this;
+
+          $http(config).success(function(data) {
+            var state = classRouter.resolve(data.class);
+
+            self.current = { state: state, entity: data };
+            self.cache.push(self.current);
+
+            $state.transitionTo(state.state, stateParams);
+
+            if (state.known && !redirectIfKnown) {
+              deferred.resolve(data);
+            }
+          });
+
+          return deferred.promise;
+        }
       }
     };
   }]);

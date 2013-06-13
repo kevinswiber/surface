@@ -1,11 +1,14 @@
 angular
   .module('surface', ['ui.state', 'siren'])
-  .config(['classRouterProvider', function(classRouterProvider) {
+  .config(['classRouterProvider', '$stateProvider',
+      function(classRouterProvider, $stateProvider) {
+
+    // Route Siren entity classes to UI states.
     classRouterProvider
       .when(['home'], 'home')
       .otherwise('entity');
-  }])
-  .config(['$stateProvider', function($stateProvider) {
+
+    // Configure UI states for app.
     $stateProvider
       .state('index', {
         url: '',
