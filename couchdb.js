@@ -15,20 +15,33 @@ var CouchVisitor = function(options) {
   }
 };
 
-CouchVisitor.prototype.build = function(ql) {
+CouchVisitor.prototype.clear = function() {
+  this.fields = [];
+  this.conjunctions = [];
+  this.disjunctions = [];
+  this.andPredicates = [];
+  this.orPredicates = [];
+  this.sorts = [];
+  this.map = null;
+};
+
+CouchVisitor.prototype.build = function(collection, ql) {
   var root = parser.parse(ql);
   root.accept(this);
 
   var opts = {
-    uri: this.uri + '/_temp_view',
+    uri: this.uri + '/' + encodeURIComponent(collection) + '/_temp_view',
     method: 'POST',
     body: JSON.stringify({ map: this.map}),
     headers: { 'Content-Type': 'application/json' }
   };
 
+  var self = this;
+
   if (!this.sorts) {
     return function(cb) {
       request(opts, function(err, res, body) {
+        self.clear();
         if (body && typeof body === 'string') {
           body = JSON.parse(body);
         };
@@ -39,6 +52,7 @@ CouchVisitor.prototype.build = function(ql) {
   } else {
     var that = this;
     return function(cb) {
+      self.clear();
       request(opts, function(err, res, body) {
         if (body && typeof body === 'string') {
           body = JSON.parse(body);
@@ -142,6 +156,7 @@ CouchVisitor.prototype.visitComparisonPredicate = function(comparison) {
   }
 
   var str = 'doc[\'' + comparison.field + '\']' + op + ' ' + comparison.value;
+  if (!comparison.array) comparison.array = [];
   comparison.array.push(str);
 };
 
@@ -208,8 +223,8 @@ CouchVisitor.prototype.createView = function() {
   return map;
 };
 
-CouchVisitor.prototype.exec = function(query, cb) {
-  var fn = this.build(query);
+CouchVisitor.prototype.exec = function(collection, query, cb) {
+  var fn = this.build(collection, query);
   fn(cb);
 };
 

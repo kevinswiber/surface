@@ -8,6 +8,8 @@ var databaseUri = conf.db;
 var baseUri = conf.href;
 var relUri = conf.rel;
 
+var queryRunner = visitor({ uri: databaseUri });
+
 if (baseUri.slice(-1) !== '/') {
   baseUri = baseUri + '/';
 }
@@ -108,8 +110,8 @@ collections.forEach(function(collection) {
       }
 
       var collectionPath = collection + '/';
-      var queryRunner = visitor({ uri: databaseUri + collectionPath });
-      queryRunner.exec(ql, function(err, res, body) {
+
+      queryRunner.exec(collection, ql, function(err, res, body) {
         if (body) {
           if (typeof body === 'string') body = JSON.parse(body);
           if (isCollection) {
