@@ -98,13 +98,13 @@ collections.forEach(function(collection) {
           env.response.statusCode = 404;
           return next(env);
         }
-        ql = 'select * where _id="' + id + '"';
+        ql = queryRunner.defaultItemQuery(id);
       } else {
         isCollection = true;
         var query = url.parse(env.request.url, true).query;
         ql = query.query;
         if (!ql) {
-          ql = 'select * where _id > "0"';
+          ql = queryRunner.defaultCollectionQuery();
           isFullCollection = true;
         }
       }
@@ -174,7 +174,7 @@ var sirenifyItem = function(collectionPath, row) {
      links: []
    };
    entity.links.push({ rel: ['self'], href: baseUri + collectionPath + row.id });
-   entity.links.push({ rel: ['edit-form'], href: baseUri + collectionPath + row.id + '?edit' });
+   //entity.links.push({ rel: ['edit-form'], href: baseUri + collectionPath + row.id + '?edit' });
    entity.links.push({ rel: ['collection'], href: baseUri + collectionPath.slice(0, -1) });
 
    Object.keys(row.value).forEach(function(prop) {

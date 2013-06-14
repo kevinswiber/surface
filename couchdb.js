@@ -15,6 +15,14 @@ var CouchVisitor = function(options) {
   }
 };
 
+CouchVisitor.prototype.defaultItemQuery = function(id) {
+  return 'select * where _id="' + id + '"'; 
+};
+
+CouchVisitor.prototype.defaultCollectionQuery = function() {
+  return 'select * where _id > "0"';
+};
+
 CouchVisitor.prototype.clear = function() {
   this.fields = [];
   this.conjunctions = [];

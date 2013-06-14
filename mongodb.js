@@ -25,6 +25,14 @@ var MongoVisitor = function(options) {
   });
 };
 
+MongoVisitor.prototype.defaultItemQuery = function(id) {
+  return 'select * where _id="' + id + '"'; 
+};
+
+MongoVisitor.prototype.defaultCollectionQuery = function() {
+  return 'select *';
+};
+
 MongoVisitor.prototype.clear = function() {
   this.fields = [];
   this.conjunctions = [];
@@ -105,7 +113,7 @@ MongoVisitor.prototype.build = function(collection, ql) {
     var callback = function(err, docs) {
       docs = docs.map(function(doc) {
         doc.type = collectionString;
-        return { value: doc };
+        return { id: doc._id, value: doc };
       });
       cb(err, null, { rows: docs, total_rows: docs.length });
       self.clear();
