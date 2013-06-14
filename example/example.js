@@ -1,6 +1,6 @@
 var url = require('url');
 var argo = require('argo');
-var conf = require('./surface.conf');
+var conf = require('./surface.mongodb.conf');
 var visitor = require('../' + conf.type);
 
 var collections = conf.collections;

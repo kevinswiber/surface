@@ -12,19 +12,51 @@ var MongoVisitor = function(options) {
   this.sorts = [];
   this.collection = null;
   this.db = null;
-  this.map = null;
   this.uri = '';
 
   if (options && options.uri) {
     this.uri = options.uri;
   }
 
+  var self = this;
   MongoClient.connect(this.uri, function(err, db) {
-    this.db = db;
+    self.db = db;
   });
 };
 
-MongoVisitor.prototype.build = function(collection, query) {
+MongoVisitor.prototype.build = function(collection, ql) {
+  this.collection = collection;
+
+  var root = parser.parse(ql);
+  root.accept(this);
+
+  var self = this;
+  return function(cb) {
+    var fields;
+    var filter = {};
+    if (!self.fields.length || self.fields[0] === '*') {
+      fields = null; 
+    } else {
+      fields = {};
+      self.fields.forEach(function(field) {
+        fields[field] = 1;
+      });
+    }
+
+    var callback = function(err, docs) {
+      docs = docs.map(function(doc) {
+        doc.type = self.collection;
+        return { value: doc };
+      });
+      cb(err, null, { rows: docs, total_rows: docs.length });
+    };
+
+    if (!fields) {
+      self.db.collection(self.collection).find(filter).toArray(callback);
+    } else {
+      self.db.collection(self.collection).find(filter, fields).toArray(callback);
+    }
+  };
 };
 
 MongoVisitor.prototype.visit = function(node) {
@@ -33,15 +65,15 @@ MongoVisitor.prototype.visit = function(node) {
 
 MongoVisitor.prototype.visitSelectStatement = function(statement) {
   statement.fieldListNode.accept(this);
-  if (statement.filterNode) {
+  /*if (statement.filterNode) {
     statement.filterNode.accept(this);
-  }
+  }*/
 
-  if (statement.orderByNode) {
+  /*if (statement.orderByNode) {
     statement.orderByNode.accept(this);
-  }
+  }*/
 
-  this.map = this.createView();
+  //this.map = this.createView();
 };
 
 MongoVisitor.prototype.visitFieldList = function(fieldList) {

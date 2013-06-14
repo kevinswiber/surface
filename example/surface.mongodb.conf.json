@@ -1,6 +1,6 @@
 {
   "collections": ["todo"],
-  "db": "http://localhost:27017/",
+  "db": "mongodb://localhost:27017/todo",
   "href": "http://localhost:3000/",
   "rel": "http://localhost:3000/rels/",
   "type": "mongodb"
