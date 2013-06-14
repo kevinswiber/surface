@@ -175,7 +175,7 @@ CouchVisitor.prototype.createView = function() {
   if (this.disjunctions) {
     var self = this;
     this.disjunctions.forEach(function(predicate) {
-      predicate.array = this.orPredicates;
+      predicate.array = self.orPredicates;
       predicate.accept(self);
     });
   }
