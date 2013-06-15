@@ -1,6 +1,7 @@
 var url = require('url');
 var argo = require('argo');
-var conf = require('./surface.mongodb.conf');
+var configFile = process.env.CONFIG || './surface.conf';
+var conf = require(configFile);
 var visitor = require('../' + conf.type);
 
 var collections = conf.collections;
@@ -87,31 +88,26 @@ collections.forEach(function(collection) {
   collection = encodeURIComponent(collection);
   proxy.get('/' + collection, function(handle) {
     handle('request', function(env, next) {
-      var ql;
+      var ql, id;
       var isCollection = true;
       var isFullCollection = false;
 
       if (env.request.url.split('/').length > 2) {
         isCollection = false;
-        var id = env.request.url.split('/')[2];
+        id = env.request.url.split('/')[2];
         if (!id) {
           env.response.statusCode = 404;
           return next(env);
         }
-        ql = queryRunner.defaultItemQuery(id);
       } else {
         isCollection = true;
         var query = url.parse(env.request.url, true).query;
         ql = query.query;
-        if (!ql) {
-          ql = queryRunner.defaultCollectionQuery();
-          isFullCollection = true;
-        }
       }
 
       var collectionPath = collection + '/';
 
-      queryRunner.exec(collection, ql, function(err, res, body) {
+      var cb = function(err, res, body) {
         if (body) {
           if (typeof body === 'string') body = JSON.parse(body);
           if (isCollection) {
@@ -126,7 +122,13 @@ collections.forEach(function(collection) {
         env.response.setHeader('Content-Type', 'application/vnd.siren+json');
         env.response.body = body;
         next(env);
-      });
+      };
+
+      if (isCollection) {
+        queryRunner.find(collection, ql, cb);
+      } else {
+        queryRunner.findOne(collection, id, cb);
+      }
     });
   });
 });

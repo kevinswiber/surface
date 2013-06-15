@@ -32,6 +32,10 @@ angular
       ['$scope', '$state', 'navigator', 'appState', SurfaceCtrls.HomeCtrl])
   .controller('EntityCtrl',
       ['$scope', '$state', '$location', 'navigator', SurfaceCtrls.EntityCtrl])
+  .controller('NavCtrl', ['$scope', function($scope) {
+    $scope.switch = function(config) {
+    };
+  }])
   .factory('appState', function() {
     return { url: '', collection: '', query: '' };
   })

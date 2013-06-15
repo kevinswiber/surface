@@ -15,14 +15,6 @@ var CouchVisitor = function(options) {
   }
 };
 
-CouchVisitor.prototype.defaultItemQuery = function(id) {
-  return 'select * where _id="' + id + '"'; 
-};
-
-CouchVisitor.prototype.defaultCollectionQuery = function() {
-  return 'select * where _id > "0"';
-};
-
 CouchVisitor.prototype.clear = function() {
   this.fields = [];
   this.conjunctions = [];
@@ -231,9 +223,18 @@ CouchVisitor.prototype.createView = function() {
   return map;
 };
 
-CouchVisitor.prototype.exec = function(collection, query, cb) {
+CouchVisitor.prototype.find = function(collection, query, cb) {
+  if (!query) {
+    query = 'select * where _id > "0"';
+  }
+
   var fn = this.build(collection, query);
   fn(cb);
+};
+
+CouchVisitor.prototype.findOne = function(collection, id, cb) {
+  var ql = 'select * where _id="' + id + '"';
+  this.find(collection, ql, cb);
 };
 
 module.exports = function(options) { return new CouchVisitor(options); };

@@ -215,9 +215,18 @@ MongoVisitor.prototype.visitComparisonPredicate = function(comparison) {
   comparison.array.push(obj);
 };
 
-MongoVisitor.prototype.exec = function(collection, query, cb) {
+MongoVisitor.prototype.find = function(collection, query, cb) {
+  if (!query) {
+    query = 'select *';
+  }
+
   var fn = this.build(collection, query);
   fn(cb);
+};
+
+MongoVisitor.prototype.findOne = function(collection, id, cb) {
+  var ql = 'select * where _id="' + id + '"';
+  this.find(collection, ql, cb);
 };
 
 module.exports = function(options) { return new MongoVisitor(options); };
