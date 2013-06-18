@@ -2,6 +2,5 @@
   "collections": ["robots"],
   "db": "https://api.usergrid.com/kevinswiber/sandbox",
   "href": "http://localhost:3000/",
-  "rel": "http://localhost:3000/rels/",
   "type": "usergrid"
 }

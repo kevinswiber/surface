@@ -2,6 +2,5 @@
   "collections": ["companies"],
   "db": "mongodb://localhost:27017/crunchbase",
   "href": "http://localhost:3000/",
-  "rel": "http://localhost:3000/rels/",
   "type": "mongodb"
 }

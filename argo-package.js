@@ -14,10 +14,6 @@ module.exports = function(config) {
     baseUri = baseUri + '/';
   }
 
-  if (relUri.slice(-1) !== '/') {
-    relUri = relUri + '/';
-  }
-
   return { package: package };
 };
 
