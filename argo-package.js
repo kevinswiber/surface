@@ -1,14 +1,13 @@
 var url = require('url');
 
-var collections, databaseUri, baseUri, relUri, driver, queryRunner, package;
+var collections, baseUri, relUri, driver, queryRunner, package;
 
 module.exports = function(config) {
   driver = config.driver;
   collections = config.collections;
-  databaseUri = config.db;
   baseUri = config.href;
   relUri = config.rel;
-  queryRunner = driver({ uri: databaseUri });
+  queryRunner = driver;
 
   if (baseUri.slice(-1) !== '/') {
     baseUri = baseUri + '/';

@@ -3,7 +3,7 @@ var surface = require('../');
 var configFile = process.env.CONFIG || './surface.conf';
 var config = require(configFile);
 
-config.driver = surface.drivers[config.type];
+config.driver = surface.drivers[config.type]({ uri: config.db });
 
 argo()
   .use(function(handle) {
