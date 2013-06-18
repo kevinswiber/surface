@@ -1,0 +1,16 @@
+{
+  "name": "surface-example",
+  "version": "0.0.0",
+  "description": "An example of using Surface.",
+  "main": "example.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": "",
+  "author": "Kevin Swiber <kswiber@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "i": "~0.3.1",
+    "argo": "~0.1.8"
+  }
+}

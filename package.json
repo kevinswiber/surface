@@ -10,7 +10,12 @@
     "type": "git",
     "url": "git://github.com/kevinswiber/surface.git"
   },
-  "author": "",
-  "license": "BSD",
-  "gitHead": "dd22517d0973d75a3e75c94d28e067b9615de67e"
+  "author": "Kevin Swiber <kswiber@gmail.com>",
+  "license": "MIT",
+  "gitHead": "dd22517d0973d75a3e75c94d28e067b9615de67e",
+  "dependencies": {
+    "request": "~2.21.0",
+    "mongodb": "~1.3.10",
+    "i": "~0.3.1"
+  }
 }
