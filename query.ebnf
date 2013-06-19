@@ -1,0 +1,64 @@
+/* converted from Jison to EBNF using http://bottlecaps.de/convert/ */
+/* Diagrams can be generated at http://railroad.my28msec.com/rr/ui */
+
+select_statement
+         ::= 'select' fields where_clause? orderby_clause?
+fields   ::= column ( ',' column )*
+           | '*'
+where_clause
+         ::= ( 'where' filter )?
+orderby_clause
+         ::= ( 'order by' sort_expression ( ',' sort_expression )* )?
+column   ::= name
+filter   ::= conjunction
+           | conjunction ( or predicate )+
+           | predicate
+conjunction
+         ::= predicate ( and predicate )+
+and
+         ::= 'and'
+         | '&&'
+or
+         ::= 'or'
+         | '||'
+predicate
+         ::= comparison_predicate
+           | contains_predicate
+           | location_predicate
+comparison_predicate
+         ::= column comparison literal
+           | 'not' column comparison literal
+contains_predicate
+         ::= column 'contains' string
+           | 'not' column 'contains' string
+location_predicate
+         ::= column 'within' location
+           | 'not' column 'within' location
+comparison
+          ::= '='
+          | '>'
+          | '>='
+          | '<'
+          | '<='
+          | 'eq'
+          | 'gt'
+          | 'gte'
+          | 'lt'
+          | 'lte'
+location ::= number 'of' coordinates
+coordinates
+         ::= number ',' number
+sort_expression
+         ::= name direction
+direction
+         ::= ( 'asc' | 'desc' )?
+literal  ::= number
+           | string
+name
+          ::= [A-Za-z0-9_-][\.A-Za-z0-9_-]*
+          | '[' name ']'
+string
+          ::= '"' [^"]* '"'
+          | "'" [^']* "'"
+number
+          ::= [+-]?[0-9]*.?[0-9]+([eE][-+]?[0-9]+)?
