@@ -46,6 +46,16 @@ CouchVisitor.prototype.build = function(collection, ql) {
           body = JSON.parse(body);
         };
 
+        if (body.rows) {
+          body.rows = body.rows.map(function(row) {
+            row.type = row.value.type;
+            if (self.fields && self.fields[0] !== '*' && self.fields.indexOf('type') === -1) {
+              delete row.value.type;
+            }
+            return row;
+          });
+        }
+
         cb(err, res, body);
       });
     };
@@ -72,6 +82,14 @@ CouchVisitor.prototype.build = function(collection, ql) {
                 return 0;
               });
             }
+          });
+
+          body.rows = body.rows.map(function(row) {
+            row.type = row.value.type;
+            if (self.fields && self.fields[0] !== '*' && self.fields.indexOf('type') === -1) {
+              delete row.value.type;
+            }
+            return row;
           });
         }
 

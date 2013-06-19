@@ -7,7 +7,6 @@ module.exports = function(config) {
   collections = config.collections;
   baseUri = config.href;
   relUri = config.rel;
-  queryRunner = driver;
 
   if (baseUri.slice(-1) !== '/') {
     baseUri = baseUri + '/';
@@ -20,8 +19,25 @@ package = function(proxy) {
   return {
     name: 'Surface',
     install: function() {
+      proxy.use(function(handle) {
+        handle('request', function(env, next) {
+          if (driver.initialize) {
+            driver.initialize(env, function(driver) {
+              env.surface = { driver: driver };
+              next(env);
+            })
+          } else {
+            env.surface = { driver: driver };
+            next(env);
+          }
+        });
+      });
+
       proxy.get('/?', function(handle) {
         handle('request', function(env, next) {
+          if (env.response.statusCode.toString()[0] === '3') {
+            return next(env);
+          }
           var query = url.parse(env.request.url, true).query;
           if (query.collection) {
             if (!~collections.indexOf(query.collection)) {
@@ -45,6 +61,9 @@ package = function(proxy) {
       });
       proxy.get('/', function(handle) {
         handle('request', function(env, next) {
+          if (env.response.statusCode.toString()[0] === '3') {
+            return next(env);
+          }
           var entities = collections.map(function(collection) {
             return {
               properties: { name: collection },
@@ -80,6 +99,9 @@ package = function(proxy) {
         collection = encodeURIComponent(collection);
         proxy.get('/' + collection, function(handle) {
           handle('request', function(env, next) {
+            if (env.response.statusCode.toString()[0] === '3') {
+              return next(env);
+            }
             var ql, id;
             var isCollection = true;
             var isFullCollection = false;
@@ -117,9 +139,9 @@ package = function(proxy) {
             };
 
             if (isCollection) {
-              queryRunner.find(collection, ql, cb);
+              env.surface.driver.find(collection, ql, cb);
             } else {
-              queryRunner.findOne(collection, id, cb);
+              env.surface.driver.findOne(collection, id, cb);
             }
           });
         });
@@ -177,8 +199,8 @@ var sirenifyItem = function(collectionPath, row) {
      entity.properties[prop] = row.value[prop];
    });
 
-   if (row.value.type) {
-     entity.class.push(row.value.type);
+   if (row.type) {
+     entity.class.push(row.type);
    }
 
    return entity;

@@ -6,14 +6,6 @@ var UsergridClient = function(options) {
   }
 };
 
-UsergridClient.prototype.defaultItemQuery = function(id) {
-  return 'select * where id="' + id + '"'; 
-};
-
-UsergridClient.prototype.defaultCollectionQuery = function() {
-  return 'select *';
-};
-
 UsergridClient.prototype._request = function(options, cb) {
   request(options, function(err, res, body) {
     if (typeof body === 'string') {
@@ -24,7 +16,7 @@ UsergridClient.prototype._request = function(options, cb) {
     if (body.entities) {
       var ents = [];
       var entities = body.entities.forEach(function(entity) {
-        ents.push({ id: entity.uuid, value: entity });
+        ents.push({ id: entity.uuid, type: entity.type, value: entity });
       });
       ret = { total_rows: body.entities.length, rows: ents };
     } else {
