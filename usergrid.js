@@ -18,12 +18,12 @@ UsergridClient.prototype._request = function(options, cb) {
       var entities = body.entities.forEach(function(entity) {
         ents.push({ id: entity.uuid, type: entity.type, value: entity });
       });
-      ret = { total_rows: body.entities.length, rows: ents };
+      ret = { count: body.entities.length, rows: ents };
     } else {
-      ret = { total_rows: 0, rows: [] };
+      ret = { count: 0, rows: [] };
     }
 
-    cb(err, res, ret);
+    cb(err, ret);
   });
 };
 

@@ -56,7 +56,10 @@ CouchVisitor.prototype.build = function(collection, ql) {
           });
         }
 
-        cb(err, res, body);
+        body.count = body.total_rows;
+        delete body.total_rows;
+
+        cb(err, body);
       });
     };
   } else {
@@ -93,7 +96,10 @@ CouchVisitor.prototype.build = function(collection, ql) {
           });
         }
 
-        cb(err, res, body);
+        body.count = body.total_rows;
+        delete body.total_rows;
+
+        cb(err, body);
       });
     };
   }

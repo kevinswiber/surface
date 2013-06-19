@@ -110,7 +110,7 @@ MongoVisitor.prototype.build = function(collection, ql) {
       docs = docs.map(function(doc) {
         return { id: doc._id, type: collectionString, value: doc };
       });
-      cb(err, null, { rows: docs, total_rows: docs.length });
+      cb(err, { rows: docs, count: docs.length });
       self.clear();
     };
 

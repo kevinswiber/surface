@@ -121,7 +121,7 @@ package = function(proxy) {
 
             var collectionPath = collection + '/';
 
-            var cb = function(err, res, body) {
+            var cb = function(err, body) {
               if (body) {
                 if (typeof body === 'string') body = JSON.parse(body);
                 if (isCollection) {
@@ -172,7 +172,7 @@ var sirenify = function(url, collectionPath, body, ql, isFullCollection) {
     skeleton.properties.timestamp = new Date().getTime();
   }
 
-  skeleton.properties.count = body.total_rows || 0;
+  skeleton.properties.count = body.count || 0;
 
   if (!body.rows) return skeleton;
 
