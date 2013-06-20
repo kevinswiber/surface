@@ -117,6 +117,7 @@ package = function(proxy) {
               isCollection = true;
               var query = url.parse(env.request.url, true).query;
               ql = query.query;
+              isFullCollection = !ql;
             }
 
             var collectionPath = collection + '/';
