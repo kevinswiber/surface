@@ -38,10 +38,9 @@ CouchVisitor.prototype.build = function(collection, ql) {
 
   var self = this;
 
-  if (!this.sorts) {
+  if (!this.sorts || !this.sorts.length) {
     return function(cb) {
       request(opts, function(err, res, body) {
-        self.clear();
         if (body && typeof body === 'string') {
           body = JSON.parse(body);
         };
@@ -59,13 +58,13 @@ CouchVisitor.prototype.build = function(collection, ql) {
         body.count = body.total_rows;
         delete body.total_rows;
 
+        self.clear();
         cb(err, body);
       });
     };
   } else {
     var that = this;
     return function(cb) {
-      self.clear();
       request(opts, function(err, res, body) {
         if (body && typeof body === 'string') {
           body = JSON.parse(body);
@@ -99,6 +98,7 @@ CouchVisitor.prototype.build = function(collection, ql) {
         body.count = body.total_rows;
         delete body.total_rows;
 
+        self.clear();
         cb(err, body);
       });
     };
