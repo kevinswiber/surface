@@ -1,8 +1,12 @@
 # Surface
 
-Add an API over your data source with SQL-like querying and hypermedia navigation.
+Expose an API over an existing data source.
 
-Surface can expose data items and collections over an API.
+Surface provides:
+
+* An API for collections and items within a data source.
+* Collection querying using a SQL-like language.
+* Hypermedia-based navigation for traversing a document graph.
 
 ## Install
 
@@ -31,19 +35,15 @@ argo()
 
 Surface is made up of 3 major components.
 
-1. API Server - An Argo package is provided for hosting Surface. This produces responses in the [Siren](https://github.com/kevinswiber/siren) hypermedia format.
-3. Drivers - Backend data sources are plugged into the framework using Surface drivers.
-4. Query Language Parser - The parser provides a way for drivers to translate Surface's Query Language into driver-specific formats.
+1. **API Server** - An Argo package is provided for hosting Surface. This produces responses in the [Siren](https://github.com/kevinswiber/siren) hypermedia format.
+3. **Drivers** - Backend data sources are plugged into the framework using Surface drivers.
+4. **Query Language Parser** - The parser provides a way for drivers to translate Surface's Query Language into driver-specific formats.
 
 Using Surface, any queryable data source can be turned into an API.
 
 ## Clients
 
-Surface serves responses in the Siren hypermedia format.
-
-Any Siren client will be able to consume a Surface API.
-
-Included is the Surface Browser, a Web UI for navigating your document graph. See: `./web`.
+Surface serves responses in the Siren hypermedia format. Any Siren client will be able to consume a Surface API. Included is the Surface Browser, a Web UI for navigating your document graph. See: `./web`.
 
 ## API Server
 
@@ -51,17 +51,19 @@ An [Argo](https://github.com/argo/argo) package is provided to include Surface i
 
 ## Drivers
 
-Drivers are made up of 3 components.
+Drivers are typically made up of 3 components.
 
-1. Client - A driver initializes a client when the Surface API loads.
-2. Session - New sessions are created for each Surface API request.
-3. Compiler - The compiler translates Surface queries into a format the data source understands.
+1. Client - A client is configured before the Surface API server starts.
+2. Session - New sessions are created for each API request (using `client.initialize`).
+3. Compiler - A compiler translates Surface queries into a format the underlying data source understands.
 
-See: [Salesforce Driver for Surface](https://github.com/kevinswiber/surface-salesforce/blob/master/salesforce.js)
+Example: [Salesforce Driver for Surface](https://github.com/kevinswiber/surface-salesforce/blob/master/salesforce.js)
 
 ## Query Language
 
 Surface provides a common Query Language for accessing and filtering data sources.
+
+This Query Language was modeled after queries in Apigee App Services.  See: http://apigee.com/docs/usergrid/content/queries-and-parameters
 
 A detailed syntax diagram can found at http://kevinswiber.github.io/surface/diagram.html
 
