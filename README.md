@@ -4,47 +4,6 @@ Add an API over your data source with SQL-like querying and hypermedia navigatio
 
 Surface can expose data items and collections over an API.
 
-## Example Query
-
-```bash
-curl "http://localhost:3000/companies?query=select+name+where+state%3D'CA'"
-```
-
-```json
-{
-  "class": ["search-results"],
-  "properties": {
-    "collection": "companies",
-    "query": "select name where state='CA'",
-    "timestamp": 1371759067298,
-    "count": 1
-  },
-  "entities": [
-    {
-      "class": ["company"],
-      "rel": ["item"],
-      "properties": {
-        "name": "GitHub"
-      },
-      "links": [
-        { "rel": ["self"], "href": "http://localhost:3000/companies/001i000000CjiAsAAJ" },
-        { "rel": ["collection"], "href": "http://localhost:3000/companies" }
-      ]
-    }
-  ]
-  "links": [
-    {
-      "rel": ["self"],
-      "href": "http://localhost:3000/companies?query=select+name+where+state%3D'CA'"
-    },
-    {
-      "rel": ["collection"],
-      "href": "http://localhost:3000/"
-    }
-  ]
-}
-```
-
 ## Install
 
 `npm install surface`
@@ -105,3 +64,48 @@ See: [Salesforce Driver for Surface](https://github.com/kevinswiber/surface-sale
 Surface provides a common Query Language for accessing and filtering data sources.
 
 A detailed syntax diagram can found at https://kevinswiber.github.io/surface/diagram.html
+
+## Example Query
+
+### Request
+
+```bash
+curl "http://localhost:3000/companies?query=select+name+where+state%3D'CA'"
+```
+
+### Response
+
+```json
+{
+  "class": ["search-results"],
+  "properties": {
+    "collection": "companies",
+    "query": "select name where state='CA'",
+    "timestamp": 1371759067298,
+    "count": 1
+  },
+  "entities": [
+    {
+      "class": ["company"],
+      "rel": ["item"],
+      "properties": {
+        "name": "GitHub"
+      },
+      "links": [
+        { "rel": ["self"], "href": "http://localhost:3000/companies/001i000000CjiAsAAJ" },
+        { "rel": ["collection"], "href": "http://localhost:3000/companies" }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "rel": ["self"],
+      "href": "http://localhost:3000/companies?query=select+name+where+state%3D'CA'"
+    },
+    {
+      "rel": ["collection"],
+      "href": "http://localhost:3000/"
+    }
+  ]
+}
+```
