@@ -1,5 +1,6 @@
 var inflect = require('i')(true);
 var mongodb = require('mongodb');
+var ObjectID = mongodb.ObjectID;
 var parser = require('./parser');
 
 var MongoClient = mongodb.MongoClient;
@@ -53,10 +54,6 @@ MongoVisitor.prototype.build = function(collection, ql) {
     self.fields.forEach(function(field) {
       fields[field] = 1;
     });
-
-    if (!fields['_id']) {
-      fields['_id'] = 0;
-    }
   }
 
   var conjunctions;
@@ -81,7 +78,9 @@ MongoVisitor.prototype.build = function(collection, ql) {
   if (this.andPredicates) {
     this.andPredicates.forEach(function(predicate) {
       Object.keys(predicate).forEach(function(key) {
-        filter[key] = predicate[key]
+        var val = predicate[key];
+        filter[key] = (key === '_id' && val.length === 24)
+          ? ObjectID(val) : val;
       });
     });
   }
@@ -90,7 +89,9 @@ MongoVisitor.prototype.build = function(collection, ql) {
     this.orPredicates.reverse().forEach(function(predicate) {
       var or = {};
       Object.keys(predicate).forEach(function(key) {
-        or[key] = predicate[key];
+        var val = predicate[key];
+        or[key] = (key === '_id' && val.length === 24)
+          ? ObjectID(val) : val;
       });
 
       filter = { $or: [filter, or] };
@@ -108,7 +109,11 @@ MongoVisitor.prototype.build = function(collection, ql) {
   return function(cb) {
     var callback = function(err, docs) {
       docs = docs.map(function(doc) {
-        return { id: doc._id, type: collectionString, value: doc };
+        var id = doc._id;
+        if (doc['_id'] && self.fields.indexOf('_id') === -1 && self.fields.indexOf('*') === -1) {
+          delete doc['_id'];
+        }
+        return { id: id, type: collectionString, value: doc };
       });
       cb(err, { rows: docs, count: docs.length });
       self.clear();
@@ -120,7 +125,7 @@ MongoVisitor.prototype.build = function(collection, ql) {
       options.fields = fields;
     }
 
-    if (sorts) {
+    if (sorts && Object.keys(sorts).length) {
       options.sort = sorts;
     }
     
