@@ -57,13 +57,13 @@ Drivers are made up of 3 components.
 2. Session - New sessions are created for each Surface API request.
 3. Compiler - The compiler translates Surface queries into a format the data source understands.
 
-See: [Salesforce Driver for Surface](https://github.com/kevinswiber/surface-salesforce)
+See: [Salesforce Driver for Surface](https://github.com/kevinswiber/surface-salesforce/blob/master/salesforce.js)
 
 ## Query Language
 
 Surface provides a common Query Language for accessing and filtering data sources.
 
-A detailed syntax diagram can found at https://kevinswiber.github.io/surface/diagram.html
+A detailed syntax diagram can found at http://kevinswiber.github.io/surface/diagram.html
 
 ## Example Query
 
