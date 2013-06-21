@@ -13,7 +13,7 @@ UsergridClient.prototype._request = function(options, cb) {
     }
 
     var ret;
-    if (body.entities) {
+    if (body && body.entities) {
       var ents = [];
       var entities = body.entities.forEach(function(entity) {
         ents.push({ id: entity.uuid, type: entity.type, value: entity });
