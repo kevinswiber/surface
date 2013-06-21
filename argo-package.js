@@ -1,158 +1,168 @@
 var url = require('url');
 
-var collections, baseUri, relUri, driver, queryRunner, package;
+var SurfacePackage = function(options) {
+  this.collections = options.collections;
+  this.baseUri = options.href;
+  this.driver = options.driver;
 
-module.exports = function(config) {
-  driver = config.driver;
-  collections = config.collections;
-  baseUri = config.href;
-  relUri = config.rel;
-
-  if (baseUri.slice(-1) !== '/') {
-    baseUri = baseUri + '/';
+  if (this.baseUri.slice(-1) !== '/') {
+    this.baseUri = this.baseUri + '/';
   }
-
-  return { package: package };
 };
 
-package = function(proxy) {
-  return {
-    name: 'Surface',
-    install: function() {
-      proxy.use(function(handle) {
-        handle('request', function(env, next) {
-          if (driver.initialize) {
-            driver.initialize(env, function(driver) {
-              env.surface = { driver: driver };
-              next(env);
-            })
-          } else {
+SurfacePackage.prototype.build = function() {
+  var self = this;
+  return function(proxy) {
+    this.proxy = proxy;
+    return {
+      name: 'Surface',
+      install: self._install(proxy)
+    };
+  };
+};
+
+SurfacePackage.prototype._install = function(proxy) {
+  var self = this;
+  return function() {
+    proxy.use(function(handle) {
+      handle('request', function(env, next) {
+        if (self.driver.initialize) {
+          self.driver.initialize(env, function(driver) {
             env.surface = { driver: driver };
             next(env);
-          }
-        });
-      });
-
-      proxy.get('/?', function(handle) {
-        handle('request', function(env, next) {
-          if (env.response.statusCode.toString()[0] === '3') {
-            return next(env);
-          }
-          var query = url.parse(env.request.url, true).query;
-          if (query.collection) {
-            if (!~collections.indexOf(query.collection)) {
-              env.response.statusCode = 404;
-              return next(env);
-            }
-
-            var location = baseUri + encodeURIComponent(query.collection);
-            if (query.query) {
-              location = location + '?query=' + encodeURIComponent(query.query);
-            }
-
-            env.response.statusCode = 303;
-            env.response.setHeader('Location', location);
-            next(env);
-          } else {
-            env.statusCode = 404;
-            next(env);
-          }
-        });
-      });
-      proxy.get('/', function(handle) {
-        handle('request', function(env, next) {
-          if (env.response.statusCode.toString()[0] === '3') {
-            return next(env);
-          }
-          var entities = collections.map(function(collection) {
-            return {
-              properties: { name: collection },
-              class: ['collection'],
-              rel: ['collection', 'item'],
-              href: baseUri + encodeURIComponent(collection)
-            };
-          });
-
-          var response = {
-            class: ['home'],
-            entities: entities,
-            actions: [
-              {
-                name: 'search',
-                href: baseUri,
-                fields: [
-                  { name: 'collection', type: 'radio', value: collections },
-                  { name: 'query' }
-                ]
-              }
-            ]
-          };
-
-          env.response.status = 200;
-          env.response.setHeader('Content-Type', 'application/vnd.siren+json');
-          env.response.body = response;
+          })
+        } else {
+          env.surface = { driver: self.driver };
           next(env);
-        });
+        }
       });
+    });
 
-      collections.forEach(function(collection) {
-        collection = encodeURIComponent(collection);
-        proxy.get('/' + collection, function(handle) {
-          handle('request', function(env, next) {
-            if (env.response.statusCode.toString()[0] === '3') {
-              return next(env);
-            }
-            var ql, id;
-            var isCollection = true;
-            var isFullCollection = false;
+    proxy.get('/?', function(handle) {
+      handle('request', function(env, next) {
+        if (env.response.statusCode.toString()[0] === '3') {
+          return next(env);
+        }
+        var query = url.parse(env.request.url, true).query;
+        if (query.collection) {
+          if (!~self.collections.indexOf(query.collection)) {
+            env.response.statusCode = 404;
+            return next(env);
+          }
 
-            if (env.request.url.split('/').length > 2) {
-              isCollection = false;
-              id = env.request.url.split('/')[2];
-              if (!id) {
-                env.response.statusCode = 404;
-                return next(env);
-              }
-            } else {
-              isCollection = true;
-              var query = url.parse(env.request.url, true).query;
-              ql = query.query;
-              isFullCollection = !ql;
-            }
+          var location = self.baseUri + encodeURIComponent(query.collection);
+          if (query.query) {
+            location = location + '?query=' + encodeURIComponent(query.query);
+          }
 
-            var collectionPath = collection + '/';
-
-            var cb = function(err, body) {
-              if (body) {
-                if (typeof body === 'string') body = JSON.parse(body);
-                if (isCollection) {
-                  body = sirenify(baseUri + env.request.url.slice(1), collectionPath, body, ql, isFullCollection);
-                } else if (body.rows[0]) {
-                  var item = body.rows[0];
-                  body = sirenifyItem(collectionPath, item);
-                  delete body.rel;
-                }
-              }
-
-              env.response.setHeader('Content-Type', 'application/vnd.siren+json');
-              env.response.body = body;
-              next(env);
-            };
-
-            if (isCollection) {
-              env.surface.driver.find(collection, ql, cb);
-            } else {
-              env.surface.driver.findOne(collection, id, cb);
-            }
-          });
-        });
+          env.response.statusCode = 303;
+          env.response.setHeader('Location', location);
+          next(env);
+        } else {
+          env.statusCode = 404;
+          next(env);
+        }
       });
+    });
 
-    }
-  }
+    proxy.get('/', function(handle) {
+      handle('request', function(env, next) {
+        if (env.response.statusCode.toString()[0] === '3') {
+          return next(env);
+        }
+        var entities = self.collections.map(function(collection) {
+          return {
+            properties: { name: collection },
+            class: ['collection'],
+            rel: ['collection', 'item'],
+            href: self.baseUri + encodeURIComponent(collection)
+          };
+        });
+
+        var response = {
+          class: ['home'],
+          entities: entities,
+          actions: [
+            {
+              name: 'search',
+              href: self.baseUri,
+              fields: [
+                { name: 'collection', type: 'radio', value: self.collections },
+                { name: 'query' }
+              ]
+            }
+          ]
+        };
+
+        env.response.status = 200;
+        env.response.setHeader('Content-Type', 'application/vnd.siren+json');
+        env.response.body = response;
+        next(env);
+      });
+    });
+
+    self.collections.forEach(function(collection) {
+      collection = encodeURIComponent(collection);
+      proxy.get('/' + collection, self._collectionHandler(collection));
+    });
+  };
 };
 
-var sirenify = function(url, collectionPath, body, ql, isFullCollection) {
+SurfacePackage.prototype._collectionHandler = function(collection) {
+  var self = this;
+  return function(handle) {
+    handle('request', function(env, next) {
+      if (env.response.statusCode.toString()[0] === '3') {
+        return next(env);
+      }
+      var ql, id;
+      var isCollection = true;
+      var isFullCollection = false;
+
+      if (env.request.url.split('/').length > 2) {
+        isCollection = false;
+        id = env.request.url.split('/')[2];
+        if (!id) {
+          env.response.statusCode = 404;
+          return next(env);
+        }
+      } else {
+        isCollection = true;
+        var query = url.parse(env.request.url, true).query;
+        ql = query.query;
+        isFullCollection = !ql;
+      }
+
+      var collectionPath = collection + '/';
+
+      var cb = function(err, body) {
+        if (body) {
+          if (typeof body === 'string') body = JSON.parse(body);
+          if (isCollection) {
+            body = self._sirenify(self.baseUri, self.baseUri + env.request.url.slice(1), collectionPath, body, ql, isFullCollection);
+          } else if (body.rows[0]) {
+            var item = body.rows[0];
+            body = self._sirenifyItem(self.baseUri, collectionPath, item);
+            delete body.rel;
+          }
+        }
+
+        env.response.setHeader('Content-Type', 'application/vnd.siren+json');
+        env.response.body = body;
+        next(env);
+      };
+
+      if (isCollection) {
+        env.surface.driver.find(collection, ql, cb);
+      } else {
+        env.surface.driver.findOne(collection, id, cb);
+      }
+    });
+  };
+};
+
+
+SurfacePackage.prototype._sirenify = function(baseUri, url, collectionPath, body, ql, isFullCollection) {
   if (!body) return body;
 
   var skeleton = {
@@ -177,23 +187,24 @@ var sirenify = function(url, collectionPath, body, ql, isFullCollection) {
 
   if (!body.rows) return skeleton;
 
+  var self = this;
   body.rows.forEach(function(row) {
-   var entity = sirenifyItem(collectionPath, row);
+   var entity = self._sirenifyItem(baseUri, collectionPath, row);
    skeleton.entities.push(entity);
   });
 
   return skeleton;
 };
 
-var sirenifyItem = function(collectionPath, row) {
+SurfacePackage.prototype._sirenifyItem = function(baseUri, collectionPath, row) {
    var entity = { 
      class: [],
      rel: ['item'],
      properties: {},
      links: []
    };
+
    entity.links.push({ rel: ['self'], href: baseUri + collectionPath + row.id });
-   //entity.links.push({ rel: ['edit-form'], href: baseUri + collectionPath + row.id + '?edit' });
    entity.links.push({ rel: ['collection'], href: baseUri + collectionPath.slice(0, -1) });
 
    Object.keys(row.value).forEach(function(prop) {
@@ -207,9 +218,8 @@ var sirenifyItem = function(collectionPath, row) {
    return entity;
 };
 
-var sirenifyEdit = function(url, body) {
-  if (!body) return body;
-  if (typeof body === 'string') body = JSON.parse(body);
-  var skeleton = { properties: {}, entities: [], links: [] };
-  return skeleton;
+module.exports = function(config) {
+  var p = new SurfacePackage(config);
+    
+  return { package: p.build() };
 };
