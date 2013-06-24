@@ -27,24 +27,6 @@ UsergridClient.prototype._request = function(options, cb) {
   });
 };
 
-UsergridClient.prototype.findOne = function(collection, id, cb) {
-  var url = this.uri;
-  if (collection) {
-    url += '/' + collection;
-  }
-
-  if (id) {
-    url += '/' + id;
-  }
-
-  var options = {
-    uri: url,
-    method: 'GET'
-  };
-
-  this._request(options, cb);
-};
-
 UsergridClient.prototype.find = function(collection, ql, cb) {
   var url = this.uri;
   if (collection) {
@@ -63,4 +45,24 @@ UsergridClient.prototype.find = function(collection, ql, cb) {
   this._request(options, cb);
 };
 
-module.exports = function(options) { return new UsergridClient(options); };
+UsergridClient.prototype.findOne = function(collection, id, cb) {
+  var url = this.uri;
+  if (collection) {
+    url += '/' + collection;
+  }
+
+  if (id) {
+    url += '/' + id;
+  }
+
+  var options = {
+    uri: url,
+    method: 'GET'
+  };
+
+  this._request(options, cb);
+};
+
+module.exports = function(options) {
+  return new UsergridClient(options);
+};
