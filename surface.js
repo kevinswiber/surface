@@ -1,4 +1,4 @@
-var couchdb = require('./couchdb');
+var couchdb = require('./drivers/couchdb/couchdb');
 var mongodb = require('./mongodb');
 var usergrid = require('./usergrid');
 var package = require('./argo-package');
