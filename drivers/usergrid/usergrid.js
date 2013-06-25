@@ -1,4 +1,5 @@
 var request = require('request');
+var session = require('./session');
 
 var UsergridClient = function(options) {
   if (options && options.uri) {
@@ -6,61 +7,8 @@ var UsergridClient = function(options) {
   }
 };
 
-UsergridClient.prototype._request = function(options, cb) {
-  request(options, function(err, res, body) {
-    if (typeof body === 'string') {
-      body = JSON.parse(body);
-    }
-
-    var ret;
-    if (body && body.entities) {
-      var ents = [];
-      var entities = body.entities.forEach(function(entity) {
-        ents.push({ id: entity.uuid, type: entity.type, value: entity });
-      });
-      ret = { count: body.entities.length, rows: ents };
-    } else {
-      ret = { count: 0, rows: [] };
-    }
-
-    cb(err, ret);
-  });
-};
-
-UsergridClient.prototype.find = function(collection, ql, cb) {
-  var url = this.uri;
-  if (collection) {
-    url += '/' + collection;
-  }
-
-  if (ql) {
-    url += '?ql=' + ql;
-  }
-
-  var options = {
-    uri: url,
-    method: 'GET'
-  };
-
-  this._request(options, cb);
-};
-
-UsergridClient.prototype.findOne = function(collection, id, cb) {
-  var url = this.uri;
-  if (collection) {
-    url += '/' + collection;
-  }
-
-  if (id) {
-    url += '/' + id;
-  }
-
-  var options = {
-    uri: url,
-    method: 'GET'
-  };
-
-  this._request(options, cb);
+UsergridClient.prototype.initialize = function(env, cb) {
+  cb(session(this));
 };
 
 module.exports = function(options) {
