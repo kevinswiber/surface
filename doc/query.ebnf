@@ -1,39 +1,42 @@
 /* converted from Jison to EBNF using http://bottlecaps.de/convert/ */
 /* Diagrams can be generated at http://railroad.my28msec.com/rr/ui */
 
-select_statement
-         ::= 'select' fields where_clause? orderby_clause?
+select-statement
+         ::= 'select' fields ( where-clause )? ( orderby-clause ) ?
 fields   ::= column ( ',' column )*
            | '*'
-where_clause
-         ::= ( 'where' filter )?
-orderby_clause
-         ::= ( 'order by' sort_expression ( ',' sort_expression )* )?
-column   ::= name
-filter   ::= conjunction
-           | conjunction ( or predicate )+
-           | predicate
-conjunction
-         ::= predicate ( and predicate )+
-and
-         ::= 'and'
-         | '&&'
-or
-         ::= 'or'
-         | '||'
+where-clause
+         ::= 'where' filter
+filter
+         ::= boolean-predicate 
+           | conjunction
+           | disjunction
+boolean-predicate ::= ('not')? predicate
 predicate
-         ::= comparison_predicate
-           | contains_predicate
-           | location_predicate
-comparison_predicate
+         ::= comparison-predicate
+           | contains-predicate
+           | location-predicate
+conjunction
+         ::= filter ( and boolean-predicate )+
+disjunction
+         ::= filter ( or boolean-predicate )+
+comparison-predicate
          ::= column comparison literal
-           | 'not' column comparison literal
-contains_predicate
+contains-predicate
          ::= column 'contains' string
-           | 'not' column 'contains' string
-location_predicate
+location-predicate
          ::= column 'within' location
-           | 'not' column 'within' location
+location ::= number 'of' coordinates
+coordinates
+         ::= number ',' number
+orderby-clause
+         ::= 'order by' sort-list
+sort-list
+         ::= sort-expression ( ',' sort-expression )*
+sort-expression
+         ::= name direction
+direction
+         ::= ( 'asc' | 'desc' )?
 comparison
           ::= '='
           | '>'
@@ -45,15 +48,15 @@ comparison
           | 'gte'
           | 'lt'
           | 'lte'
-location ::= number 'of' coordinates
-coordinates
-         ::= number ',' number
-sort_expression
-         ::= name direction
-direction
-         ::= ( 'asc' | 'desc' )?
+and
+         ::= 'and'
+         | '&&'
+or
+         ::= 'or'
+         | '||'
 literal  ::= number
            | string
+column   ::= name
 name
           ::= [A-Za-z0-9_-][\.A-Za-z0-9_-]*
           | '[' name ']'
