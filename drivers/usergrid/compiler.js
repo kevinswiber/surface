@@ -3,11 +3,9 @@ var parser = require('../../parser');
 
 var UsergridCompiler = function(options) {
   this.fields = [];
-  this.conjunctions = [];
-  this.disjunctions = [];
-  this.andPredicates = [];
-  this.orPredicates = [];
   this.sorts = '';
+  this.filter = [];
+  this.query = [];
 
   this.removeUUID = false;
   this.removeType = false;
@@ -73,38 +71,10 @@ UsergridCompiler.prototype._compileCollectionQuery = function(collection, ql) {
   var root = parser.parse(ql);
   root.accept(this); 
 
-  var conjunctions;
-  var disjunctions;
-  var filter = '';
+  var statement = 'select ' + this.fields.join(', ');
 
-  if (this.conjunctions) {
-    var self = this;
-    this.conjunctions.forEach(function(predicate) {
-      predicate.array = self.andPredicates;
-      predicate.accept(self);
-    });
-  }
-
-  if (this.disjunctions) {
-    var self = this;
-    this.disjunctions.forEach(function(predicate) {
-      predicate.array = self.orPredicates;
-      predicate.accept(self);
-    });
-  }
-
-  if (this.andPredicates.length) {
-    filter = this.andPredicates.join(' and ');
-  }
-
-  if (this.orPredicates.length) {
-    filter += ' or ' + this.orPredicates.reverse().join(' or ');
-  }
-
-  var statement = 'select ' + this.fields.join(',');
-
-  if (filter) {
-    statement += ' where ' + filter;
+  if (this.filter.length) {
+    statement += ' where ' + this.filter.join(' ');
   }
 
   if (this.sorts) {
@@ -156,11 +126,7 @@ UsergridCompiler.prototype.visitFieldList = function(fieldList) {
 };
 
 UsergridCompiler.prototype.visitFilter = function(filterList) {
-  if (filterList.expression.type.slice(-9) === 'Predicate') {
-    this.conjunctions.push(filterList.expression);
-  } else {
-    filterList.expression.accept(this);
-  }
+  filterList.expression.accept(this);
 };
 
 UsergridCompiler.prototype.visitOrderBy = function(orderBy) {
@@ -175,39 +141,22 @@ UsergridCompiler.prototype.visitOrderBy = function(orderBy) {
 };
 
 UsergridCompiler.prototype.visitConjunction = function(conjunction) {
-  var isRightPredicate = conjunction.right.type.slice(-9) === 'Predicate';
-
-  if (isRightPredicate) {
-    this.conjunctions.push(conjunction.right);
-  }
-
-  conjunction.left.array = this.andPredicates;
   conjunction.left.accept(this);
-
-  if (!isRightPredicate) {
-    conjunction.right.array = this.andPredicates
-    conjunction.right.accept(this);
-  }
+  this.filter.push('and');
+  conjunction.right.accept(this);
 };
 
 UsergridCompiler.prototype.visitDisjunction = function(disjunction) {
-  var isRightPredicate = disjunction.right.type.slice(-9) === 'Predicate';
-
-  if (isRightPredicate) {
-    this.disjunctions.push(disjunction.right);
-  }
-
   disjunction.left.accept(this);
-
-  if (!isRightPredicate) {
-    disjunction.right.accept(this);
-  }
+  this.filter.push('or');
+  disjunction.right.accept(this);
 };
 
 UsergridCompiler.prototype.visitComparisonPredicate = function(comparison) {
   if (!comparison.array) comparison.array = [];
   var expr = [comparison.field, comparison.operator, comparison.value];
   comparison.array.push(expr.join(' '));
+  this.filter.push(expr.join(' '));
 };
 
 UsergridCompiler.prototype._request = function(options, cb) {

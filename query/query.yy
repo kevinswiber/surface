@@ -40,22 +40,18 @@ where_clause
   ;
 
 filter
-  : conjunction
+  : predicate
+  | conjunction
   | disjunction
-  | predicate
   ;
 
 conjunction
-  : predicate AND predicate
-    { $$ = new yy.ConjunctionNode($1, $3); }
-  | conjunction AND predicate
+  : filter AND predicate
     { $$ = new yy.ConjunctionNode($1, $3); }
   ;
 
 disjunction
-  : conjunction OR predicate
-    { $$ = new yy.DisjunctionNode($1, $3); }
-  | disjunction OR predicate
+  : filter OR predicate
     { $$ = new yy.DisjunctionNode($1, $3); }
   ;
 
