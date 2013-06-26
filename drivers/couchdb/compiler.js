@@ -3,10 +3,7 @@ var parser = require('../../parser');
 
 var CouchDbCompiler = function(options) {
   this.fields = [];
-  this.conjunctions = [];
-  this.disjunctions = [];
-  this.andPredicates = [];
-  this.orPredicates = [];
+  this.filter = [];
   this.sorts = [];
   this.map = null;
 
@@ -115,25 +112,13 @@ CouchDbCompiler.prototype.visitFieldList = function(fieldList) {
 };
 
 CouchDbCompiler.prototype.visitFilter = function(filterList) {
-  if (filterList.expression.type.slice(-9) === 'Predicate') {
-    this.conjunctions.push(filterList.expression);
-  } else {
-    filterList.expression.accept(this);
-  }
+  filterList.expression.accept(this);
 };
 
 CouchDbCompiler.prototype.visitDisjunction = function(disjunction) {
-  var isRightPredicate = disjunction.right.type.slice(-9) === 'Predicate';
-
-  if (isRightPredicate) {
-    this.disjunctions.push(disjunction.right);
-  }
-
   disjunction.left.accept(this);
-
-  if (!isRightPredicate) {
-    disjunction.right.accept(this);
-  }
+  this.filter.push('||');
+  disjunction.right.accept(this);
 };
 
 CouchDbCompiler.prototype.visitOrderBy = function(orderBy) {
@@ -141,19 +126,9 @@ CouchDbCompiler.prototype.visitOrderBy = function(orderBy) {
 };
 
 CouchDbCompiler.prototype.visitConjunction = function(conjunction) {
-  var isRightPredicate = conjunction.right.type.slice(-9) === 'Predicate';
-
-  if (isRightPredicate) {
-    this.conjunctions.push(conjunction.right);
-  }
-
-  conjunction.left.array = this.andPredicates;
   conjunction.left.accept(this);
-
-  if (!isRightPredicate) {
-    conjunction.right.array = this.andPredicates
-    conjunction.right.accept(this);
-  }
+  this.filter.push('&&');
+  conjunction.right.accept(this);
 };
 
 CouchDbCompiler.prototype.visitComparisonPredicate = function(comparison) {
@@ -168,46 +143,11 @@ CouchDbCompiler.prototype.visitComparisonPredicate = function(comparison) {
   }
 
   var str = 'doc[\'' + comparison.field + '\']' + op + ' ' + comparison.value;
-  if (!comparison.array) comparison.array = [];
-  comparison.array.push(str);
+  this.filter.push(str);
 };
 
 CouchDbCompiler.prototype.createView = function() {
-  var conjunctions;
-  var disjunctions;
-
-  if (this.conjunctions) {
-    var self = this;
-    this.conjunctions.forEach(function(predicate) {
-      predicate.array = self.andPredicates;
-      predicate.accept(self);
-    });
-  }
-
-  if (this.disjunctions) {
-    var self = this;
-    this.disjunctions.forEach(function(predicate) {
-      predicate.array = self.orPredicates;
-      predicate.accept(self);
-    });
-  }
-
-  var andStr;
-  var orStr;
-
-  if (this.andPredicates) {
-    andStr = this.andPredicates.join(' && ');
-  }
-  
-  if (this.orPredicates) {
-    orStr = this.orPredicates.join(' || ');
-  }
-
-  var str = andStr;
-  if (orStr) {
-    str = str + ' || ' + orStr;
-  }
-
+  var str = this.filter.join(' ');
   var emitStr;
 
   if (this.fields[0] === '*') {

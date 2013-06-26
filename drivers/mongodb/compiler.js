@@ -14,6 +14,9 @@ var MongoDbCompiler = function(options) {
   this.sorts = [];
   this.collection = null;
   this.db = null;
+  this.filter = [];
+  this.lastOr = [];
+  this.ors = [];
 
   if (options && options.db) {
     this.db = options.db;
@@ -40,7 +43,7 @@ MongoDbCompiler.prototype.compile = function(collection, ql) {
     });
   }
 
-  var conjunctions;
+  /*var conjunctions;
   var disjunctions;
 
   if (this.conjunctions) {
@@ -80,7 +83,14 @@ MongoDbCompiler.prototype.compile = function(collection, ql) {
 
       filter = { $or: [filter, or] };
     });
-  }
+  }*/
+
+  var filter = {};
+  this.filter.forEach(function(condition) {
+    Object.keys(condition).forEach(function(k) {
+      filter[k] = condition[k];
+    });
+  });
 
   if (this.sorts) {
     this.sorts.forEach(function(sort) {
@@ -136,11 +146,7 @@ MongoDbCompiler.prototype.visitFieldList = function(fieldList) {
 };
 
 MongoDbCompiler.prototype.visitFilter = function(filterList) {
-  if (filterList.expression.type.slice(-9) === 'Predicate') {
-    this.conjunctions.push(filterList.expression);
-  } else {
-    filterList.expression.accept(this);
-  }
+  filterList.expression.accept(this);
 };
 
 MongoDbCompiler.prototype.visitOrderBy = function(orderBy) {
@@ -148,33 +154,19 @@ MongoDbCompiler.prototype.visitOrderBy = function(orderBy) {
 };
 
 MongoDbCompiler.prototype.visitConjunction = function(conjunction) {
-  var isRightPredicate = conjunction.right.type.slice(-9) === 'Predicate';
+  var obj = {};
+  conjunction.left.obj = conjunction.right.obj = obj;
 
-  if (isRightPredicate) {
-    this.conjunctions.push(conjunction.right);
-  }
-
-  conjunction.left.array = this.andPredicates;
+  conjunction.left.dir = 'left';
+  conjunction.right.dir = 'right';
   conjunction.left.accept(this);
-
-  if (!isRightPredicate) {
-    conjunction.right.array = this.andPredicates
-    conjunction.right.accept(this);
-  }
+  conjunction.right.accept(this);
 };
 
 MongoDbCompiler.prototype.visitDisjunction = function(disjunction) {
-  var isRightPredicate = disjunction.right.type.slice(-9) === 'Predicate';
-
-  if (isRightPredicate) {
-    this.disjunctions.push(disjunction.right);
-  }
-
+  this.ors.push([]);
   disjunction.left.accept(this);
-
-  if (!isRightPredicate) {
-    disjunction.right.accept(this);
-  }
+  disjunction.right.accept(this);
 };
 
 MongoDbCompiler.prototype.visitComparisonPredicate = function(comparison) {
@@ -192,8 +184,35 @@ MongoDbCompiler.prototype.visitComparisonPredicate = function(comparison) {
     case 'gte': obj[comparison.field] = { $gte: val }; break;
   }
 
-  if (!comparison.array) comparison.array = [];
-  comparison.array.push(obj);
+  var cur = obj;
+  if (comparison.obj) {
+    comparison.obj[comparison.field] = obj[comparison.field];
+    if (comparison.dir === 'right') {
+      if (this.ors.length) {
+        cur = comparison.obj;
+      } else {
+        this.filter.push(comparison.obj);
+      }
+    }
+  }
+
+  if (this.ors.length && (!comparison.obj || !comparison.dir || comparison.dir === 'right')) {
+    var or = this.ors[this.ors.length - 1];
+    if (or.length < 2) {
+      or.push(cur);
+    }
+    
+    while (this.ors.length && (or = this.ors[this.ors.length - 1]).length == 2) {
+      var lastOr = this.ors.pop();
+      if (this.ors.length && this.ors[this.ors.length - 1].length < 2) {
+        this.ors[this.ors.length - 1].push({ $or: lastOr });
+      } else  {
+        this.filter.push({ $or: lastOr });
+      }
+    }
+  } else if (!comparison.obj) {
+    this.filter.push(cur);
+  }
 };
 
 module.exports = function(options) { return new MongoDbCompiler(options); };
