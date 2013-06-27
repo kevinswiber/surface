@@ -141,6 +141,9 @@ UsergridCompiler.prototype.visitOrderBy = function(orderBy) {
 };
 
 UsergridCompiler.prototype.visitConjunction = function(conjunction) {
+  if (conjunction.isNegated) {
+    this.filter.push('not');
+  }
   this.filter.push('(');
   conjunction.left.accept(this);
   this.filter.push('and');
@@ -149,6 +152,9 @@ UsergridCompiler.prototype.visitConjunction = function(conjunction) {
 };
 
 UsergridCompiler.prototype.visitDisjunction = function(disjunction) {
+  if (disjunction.isNegated) {
+    this.filter.push('not');
+  }
   this.filter.push('(');
   disjunction.left.accept(this);
   this.filter.push('or');
@@ -159,6 +165,9 @@ UsergridCompiler.prototype.visitDisjunction = function(disjunction) {
 UsergridCompiler.prototype.visitComparisonPredicate = function(comparison) {
   if (!comparison.array) comparison.array = [];
   var expr = [comparison.field, comparison.operator, comparison.value];
+  if (comparison.isNegated) {
+    expr.unshift('not');
+  }
   comparison.array.push(expr.join(' '));
   this.filter.push(expr.join(' '));
 };

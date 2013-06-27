@@ -79,7 +79,7 @@ MongoDbCompiler.prototype.compile = function(collection, ql) {
     if (sorts && Object.keys(sorts).length) {
       options.sort = sorts;
     }
-    
+
     self.db.collection(collection).find(filter, options).toArray(callback);
   };
 };
@@ -112,6 +112,11 @@ MongoDbCompiler.prototype.visitOrderBy = function(orderBy) {
 };
 
 MongoDbCompiler.prototype.visitConjunction = function(conjunction) {
+  if (conjunction.isNegated) {
+    conjunction.left.negate();
+    conjunction.right.negate();
+  }
+
   var obj = {};
   conjunction.left.obj = conjunction.right.obj = obj;
 
@@ -122,7 +127,7 @@ MongoDbCompiler.prototype.visitConjunction = function(conjunction) {
 };
 
 MongoDbCompiler.prototype.visitDisjunction = function(disjunction) {
-  this.ors.push([]);
+  this.ors.push({ isNegated: disjunction.isNegated, value: [] });
   disjunction.left.accept(this);
   disjunction.right.accept(this);
 };
@@ -175,16 +180,22 @@ MongoDbCompiler.prototype.visitComparisonPredicate = function(comparison) {
 
   if (this.ors.length && (!comparison.obj || !comparison.dir || comparison.dir === 'right')) {
     var or = this.ors[this.ors.length - 1];
-    if (or.length < 2) {
-      or.push(cur);
+    if (or.value.length < 2) {
+      or.value.push(cur);
     }
     
-    while (this.ors.length && (or = this.ors[this.ors.length - 1]).length == 2) {
+    while (this.ors.length && (or = this.ors[this.ors.length - 1]).value.length == 2) {
       var lastOr = this.ors.pop();
-      if (this.ors.length && this.ors[this.ors.length - 1].length < 2) {
-        this.ors[this.ors.length - 1].push({ $or: lastOr });
+      if (this.ors.length && this.ors[this.ors.length - 1].value.length < 2) {
+        var dis = {};
+        var op = lastOr.isNegated ? '$nor' : '$or';
+        dis[op] = lastOr.value;
+        this.ors[this.ors.length - 1].value.push(dis);
       } else  {
-        this.filter.push({ $or: lastOr });
+        var dis = {};
+        var op = lastOr.isNegated ? '$nor' : '$or';
+        dis[op] = lastOr.value;
+        this.filter.push(dis);
       }
     }
   } else if (!comparison.obj) {
@@ -193,4 +204,3 @@ MongoDbCompiler.prototype.visitComparisonPredicate = function(comparison) {
 };
 
 module.exports = function(options) { return new MongoDbCompiler(options); };
-

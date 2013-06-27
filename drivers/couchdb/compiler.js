@@ -116,6 +116,9 @@ CouchDbCompiler.prototype.visitFilter = function(filterList) {
 };
 
 CouchDbCompiler.prototype.visitDisjunction = function(disjunction) {
+  if (disjunction.isNegated) {
+    this.filter.push('!');
+  }
   this.filter.push('(');
   disjunction.left.accept(this);
   this.filter.push('||');
@@ -128,6 +131,9 @@ CouchDbCompiler.prototype.visitOrderBy = function(orderBy) {
 };
 
 CouchDbCompiler.prototype.visitConjunction = function(conjunction) {
+  if (conjunction.isNegated) {
+    this.filter.push('!');
+  }
   this.filter.push('(');
   conjunction.left.accept(this);
   this.filter.push('&&');

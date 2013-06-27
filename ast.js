@@ -33,26 +33,26 @@ Ast.NotNode = function(expression){
 };
 
 Ast.DisjunctionNode = function(left, right) {
+  this.isNegated = false;
   this.left = left;
   this.right = right;
   this.type = 'Disjunction';
 };
 
 Ast.DisjunctionNode.prototype.negate = function() {
-  this.left.negate();
-  this.right.negate();
+  this.isNegated = true;
   return this;
 };
 
 Ast.ConjunctionNode = function(left, right) {
+  this.isNegated = false;
   this.left = left;
   this.right = right;
   this.type = 'Conjunction';
 };
 
 Ast.ConjunctionNode.prototype.negate = function() {
-  this.left.negate();
-  this.right.negate();
+  this.isNegated = true;
   return this;
 };
 
