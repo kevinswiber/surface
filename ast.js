@@ -26,10 +26,22 @@ Ast.FilterNode = function(expression) {
   this.type = 'Filter'
 };
 
+Ast.NotNode = function(expression){
+  expression.negate();
+  this.expression = expression;
+  this.type = 'Not';
+};
+
 Ast.DisjunctionNode = function(left, right) {
   this.left = left;
   this.right = right;
   this.type = 'Disjunction';
+};
+
+Ast.DisjunctionNode.prototype.negate = function() {
+  this.left.negate();
+  this.right.negate();
+  return this;
 };
 
 Ast.ConjunctionNode = function(left, right) {
@@ -38,28 +50,49 @@ Ast.ConjunctionNode = function(left, right) {
   this.type = 'Conjunction';
 };
 
-Ast.ComparisonPredicateNode = function(field, operator, value, isNegated) {
+Ast.ConjunctionNode.prototype.negate = function() {
+  this.left.negate();
+  this.right.negate();
+  return this;
+};
+
+Ast.ComparisonPredicateNode = function(field, operator, value) {
   this.field = field;
   this.operator = operator;
   this.value = value;
-  this.isNegated = isNegated;
+  this.isNegated = false;
   this.type = 'ComparisonPredicate';
 };
 
-Ast.ContainsPredicateNode = function(field, value, isNegated) {
+Ast.ComparisonPredicateNode.prototype.negate = function() {
+  this.isNegated = true;
+  return this;
+};
+
+Ast.ContainsPredicateNode = function(field, value) {
   this.field = field;
   this.operator = 'contains';
   this.value = value;
-  this.isNegated = isNegated;
+  this.isNegated = false;
   this.type = 'ContainsPredicate';
 };
 
-Ast.LocationPredicateNode = function(field, value, isNegated) {
+Ast.ContainsPredicateNode.prototype.negate = function() {
+  this.isNegated = true;
+  return this;
+};
+
+Ast.LocationPredicateNode = function(field, value) {
   this.field = field;
   this.operator = 'within';
   this.value = value;
-  this.isNegated = isNegated;
+  this.isNegated = false;
   this.type = 'LocationPredicate';
+};
+
+Ast.LocationPredicateNode.prototype.negate = function() {
+  this.isNegated = true;
+  return this;
 };
 
 Ast.LocationNode = function(distance, coordinates) {

@@ -39,14 +39,6 @@ where_clause
     { $$ = new yy.FilterNode($2); }
   ;
 
-filter
-  : predicate
-  | conjunction
-  | disjunction
-  | '(' filter ')'
-    { $$ = $2 }
-  ;
-
 conjunction
   : filter AND filter 
     { $$ = new yy.ConjunctionNode($1, $3); }
@@ -57,6 +49,16 @@ disjunction
     { $$ = new yy.DisjunctionNode($1, $3); }
   ;
 
+filter
+  : predicate
+  | conjunction
+  | disjunction
+  | '(' filter ')'
+    { $$ = $2 }
+  | NOT filter
+    { $$ = $2.negate(); }
+  ;
+
 predicate
   : comparison_predicate
   | contains_predicate
@@ -65,23 +67,17 @@ predicate
 
 comparison_predicate
   : column COMPARISON literal 
-    { $$ = new yy.ComparisonPredicateNode($1, $2, $3, false); }
-  | NOT column COMPARISON literal
-    { $$ = new yy.ComparisonPredicateNode($2, $3, $4, true); }
+    { $$ = new yy.ComparisonPredicateNode($1, $2, $3); }
   ;
 
 contains_predicate
   : column CONTAINS STRING
-    { $$ = new yy.ContainsPredicateNode($1, $3, false); }
-  | NOT column CONTAINS STRING
-    { $$ = new yy.ContainsPredicateNode($2, $4, true); }
+    { $$ = new yy.ContainsPredicateNode($1, $3); }
   ;
 
 location_predicate
   : column WITHIN location
-    { $$ = new yy.LocationPredicateNode($1, $3, false); }
-  | NOT column WITHIN location
-    { $$ = new yy.LocationPredicateNode($2, $4, true); }
+    { $$ = new yy.LocationPredicateNode($1, $3); }
   ;
 
 location

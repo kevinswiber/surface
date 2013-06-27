@@ -160,6 +160,9 @@ MongoDbCompiler.prototype.visitComparisonPredicate = function(comparison) {
 
   var cur = obj;
   if (comparison.obj) {
+    if (comparison.obj[comparison.field]) {
+      throw new Error('Syntax error: multiple instances of `' + comparison.field + '`.');
+    }
     comparison.obj[comparison.field] = obj[comparison.field];
     if (comparison.dir === 'right') {
       if (this.ors.length) {
