@@ -116,9 +116,11 @@ CouchDbCompiler.prototype.visitFilter = function(filterList) {
 };
 
 CouchDbCompiler.prototype.visitDisjunction = function(disjunction) {
+  this.filter.push('(');
   disjunction.left.accept(this);
   this.filter.push('||');
   disjunction.right.accept(this);
+  this.filter.push(')');
 };
 
 CouchDbCompiler.prototype.visitOrderBy = function(orderBy) {
@@ -126,9 +128,11 @@ CouchDbCompiler.prototype.visitOrderBy = function(orderBy) {
 };
 
 CouchDbCompiler.prototype.visitConjunction = function(conjunction) {
+  this.filter.push('(');
   conjunction.left.accept(this);
   this.filter.push('&&');
   conjunction.right.accept(this);
+  this.filter.push(')');
 };
 
 CouchDbCompiler.prototype.visitComparisonPredicate = function(comparison) {

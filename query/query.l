@@ -13,8 +13,8 @@ escaped_name  \[(?:(?!\])[^\\]|\\.)*\]
                                           this.begin('sel');
                                           return 'SELECT';
                                         }
-<sel,fltr,loc,ordby>","                 return 'COMMA'
-<sel>"*"                                return 'STAR'
+<sel,fltr,loc,ordby>","                 return ','
+<sel>"*"                                return '*'
 <sel>"where"                            {
                                           this.popState(); /* in: INITIAL */
                                           this.begin('fltr');
@@ -48,6 +48,8 @@ escaped_name  \[(?:(?!\])[^\\]|\\.)*\]
                                           yytext = yytext.slice(1, -1);
                                           return 'NAME';
                                         }
+<fltr>"("                               return '('
+<fltr>")"                               return ')'
 <asgn>"eq"|"gt"|"lt"|"gte"|"lte"        return 'COMPARISON'
 <asgn>">="|"<="                         {
                                           yytext = letterify(yytext);
@@ -62,6 +64,8 @@ escaped_name  \[(?:(?!\])[^\\]|\\.)*\]
                                           this.begin('loc');
                                           return 'WITHIN';
                                         }
+<asgn>"true"|"false"                    return 'BOOLEAN'
+<asgn>"null"                            return 'NULL'
 <asgn>(["'])(?:(?!\1)[^\\]|\\.)*\1      {
                                           this.popState(); /* in: fltr */
                                           return 'STRING';

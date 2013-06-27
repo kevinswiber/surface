@@ -141,15 +141,19 @@ UsergridCompiler.prototype.visitOrderBy = function(orderBy) {
 };
 
 UsergridCompiler.prototype.visitConjunction = function(conjunction) {
+  this.filter.push('(');
   conjunction.left.accept(this);
   this.filter.push('and');
   conjunction.right.accept(this);
+  this.filter.push(')');
 };
 
 UsergridCompiler.prototype.visitDisjunction = function(disjunction) {
+  this.filter.push('(');
   disjunction.left.accept(this);
   this.filter.push('or');
   disjunction.right.accept(this);
+  this.filter.push(')');
 };
 
 UsergridCompiler.prototype.visitComparisonPredicate = function(comparison) {

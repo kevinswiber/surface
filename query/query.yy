@@ -18,14 +18,14 @@ select_statement
 
 fields
   : column_list 
-  | 'STAR'
+  | '*'
     { $$ = new yy.FieldListNode('*'); }
   ;
 
 column_list
   : column
     { $$ = new yy.FieldListNode($1); }
-  | column_list COMMA column
+  | column_list ',' column
     { $1.push($3); $$ = $1; }
   ;
 
@@ -43,15 +43,17 @@ filter
   : predicate
   | conjunction
   | disjunction
+  | '(' filter ')'
+    { $$ = $2 }
   ;
 
 conjunction
-  : filter AND predicate
+  : filter AND filter 
     { $$ = new yy.ConjunctionNode($1, $3); }
   ;
 
 disjunction
-  : filter OR predicate
+  : filter OR filter 
     { $$ = new yy.DisjunctionNode($1, $3); }
   ;
 
@@ -88,7 +90,7 @@ location
   ;
 
 coordinates
-  : NUMBER COMMA NUMBER
+  : NUMBER ',' NUMBER
     { $$ = new yy.CoordinatesNode($1, $3); }
   ;
 
@@ -101,7 +103,7 @@ orderby_clause
 sort_list
   : sort_expression 
     { $$ = new yy.SortListNode($1); }
-  | sort_list COMMA sort_expression
+  | sort_list ',' sort_expression
     { $1.push($3); $$ = $1; }
   ;
 
