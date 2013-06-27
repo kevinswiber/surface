@@ -64,8 +64,6 @@ escaped_name  \[(?:(?!\])[^\\]|\\.)*\]
                                           this.begin('loc');
                                           return 'WITHIN';
                                         }
-<asgn>"true"|"false"                    return 'BOOLEAN'
-<asgn>"null"                            return 'NULL'
 <asgn>(["'])(?:(?!\1)[^\\]|\\.)*\1      {
                                           this.popState(); /* in: fltr */
                                           return 'STRING';
@@ -73,6 +71,21 @@ escaped_name  \[(?:(?!\])[^\\]|\\.)*\]
 <asgn>{number}                          {
                                           this.popState(); /* in: fltr */
                                           return 'NUMBER';
+                                        }
+<asgn>"true"                            {
+                                          this.popState(); /* in fltr */
+                                          yytext = true;
+                                          return 'TRUE';
+                                        }
+<asgn>"false"                           {
+                                          this.popState(); /* in fltr */
+                                          yytext = false;
+                                          return 'FALSE';
+                                        }
+<asgn>"null"                            {
+                                          this.popState(); /* in fltr */
+                                          yytext = null;
+                                          return 'NULL';
                                         }
 <loc>{number}                           return 'NUMBER'
 <loc>"of"                               return 'OF'

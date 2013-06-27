@@ -43,48 +43,6 @@ MongoDbCompiler.prototype.compile = function(collection, ql) {
     });
   }
 
-  /*var conjunctions;
-  var disjunctions;
-
-  if (this.conjunctions) {
-    var self = this;
-    this.conjunctions.forEach(function(predicate) {
-      predicate.array = self.andPredicates;
-      predicate.accept(self);
-    });
-  }
-
-  if (this.disjunctions) {
-    var self = this;
-    this.disjunctions.forEach(function(predicate) {
-      predicate.array = self.orPredicates;
-      predicate.accept(self);
-    });
-  }
-
-  if (this.andPredicates) {
-    this.andPredicates.forEach(function(predicate) {
-      Object.keys(predicate).forEach(function(key) {
-        var val = predicate[key];
-        filter[key] = (key === '_id' && val.length === 24)
-          ? ObjectID(val) : val;
-      });
-    });
-  }
-
-  if (this.orPredicates) {
-    this.orPredicates.reverse().forEach(function(predicate) {
-      var or = {};
-      Object.keys(predicate).forEach(function(key) {
-        var val = predicate[key];
-        or[key] = (key === '_id' && val.length === 24)
-          ? ObjectID(val) : val;
-      });
-
-      filter = { $or: [filter, or] };
-    });
-  }*/
-
   var filter = {};
   this.filter.forEach(function(condition) {
     Object.keys(condition).forEach(function(k) {
@@ -172,17 +130,33 @@ MongoDbCompiler.prototype.visitDisjunction = function(disjunction) {
 MongoDbCompiler.prototype.visitComparisonPredicate = function(comparison) {
   var obj = {};
 
-  var val = comparison.value[0] === '\'' || comparison.value[0] === '"'
-    ? comparison.value.slice(1, -1)
-    : Number(comparison.value);
+  var val;
 
-  switch(comparison.operator) {
-    case 'eq': obj[comparison.field] = val; break;
-    case 'lt': obj[comparison.field] = { $lt: val }; break;
-    case 'lte': obj[comparison.field] = { $lte: val }; break;
-    case 'gt': obj[comparison.field] = { $gt: val }; break;
-    case 'gte': obj[comparison.field] = { $gte: val }; break;
+  if (typeof comparison.value === 'boolean' || comparison.value == null) {
+    val = comparison.value
+  } else {
+    val = comparison.value[0] === '\'' || comparison.value[0] === '"'
+      ? comparison.value.slice(1, -1)
+      : Number(comparison.value);
   }
+
+  var mongoVal;
+  switch(comparison.operator) {
+    case 'eq': mongoVal = val; break;
+    case 'lt': mongoVal = { $lt: val }; break;
+    case 'lte': mongoVal = { $lte: val }; break;
+    case 'gt': mongoVal = { $gt: val }; break;
+    case 'gte': mongoVal = { $gte: val }; break;
+  }
+
+  if (comparison.isNegated) {
+    var op = comparison.operator === 'eq' ? '$ne' : '$not';
+    var v = {};
+    v[op] = mongoVal;
+    mongoVal = v;
+  }
+
+  obj[comparison.field] = mongoVal;
 
   var cur = obj;
   if (comparison.obj) {

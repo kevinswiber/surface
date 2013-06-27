@@ -118,7 +118,14 @@ direction
   | DESC
   ;
 
+boolean
+  : TRUE
+  | FALSE
+  ;
+
 literal
   : NUMBER
   | STRING
+  | boolean
+  | NULL
   ;
