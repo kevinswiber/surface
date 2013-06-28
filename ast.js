@@ -40,7 +40,7 @@ Ast.DisjunctionNode = function(left, right) {
 };
 
 Ast.DisjunctionNode.prototype.negate = function() {
-  this.isNegated = true;
+  this.isNegated = !this.isNegated;
   return this;
 };
 
@@ -52,7 +52,7 @@ Ast.ConjunctionNode = function(left, right) {
 };
 
 Ast.ConjunctionNode.prototype.negate = function() {
-  this.isNegated = true;
+  this.isNegated = !this.isNegated;
   return this;
 };
 
@@ -65,7 +65,7 @@ Ast.ComparisonPredicateNode = function(field, operator, value) {
 };
 
 Ast.ComparisonPredicateNode.prototype.negate = function() {
-  this.isNegated = true;
+  this.isNegated = !this.isNegated;
   return this;
 };
 
@@ -78,7 +78,7 @@ Ast.ContainsPredicateNode = function(field, value) {
 };
 
 Ast.ContainsPredicateNode.prototype.negate = function() {
-  this.isNegated = true;
+  this.isNegated = !this.isNegated;
   return this;
 };
 
@@ -91,7 +91,7 @@ Ast.LocationPredicateNode = function(field, value) {
 };
 
 Ast.LocationPredicateNode.prototype.negate = function() {
-  this.isNegated = true;
+  this.isNegated = !this.isNegated;
   return this;
 };
 
