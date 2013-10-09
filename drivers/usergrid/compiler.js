@@ -140,6 +140,22 @@ UsergridCompiler.prototype.visitOrderBy = function(orderBy) {
   }).join(' ');
 };
 
+UsergridCompiler.prototype.visitLocationPredicate = function(location) {
+  if (location.operator !== 'within') {
+    return;
+  }
+
+  if (location.isNegated) {
+    this.filter.push('not');
+  }
+
+  this.filter.push('location within');
+  this.filter.push(location.value.distance);
+  this.filter.push('of');
+  this.filter.push(location.value.coordinates.lattitude + ',');
+  this.filter.push(location.value.coordinates.longitude);
+};
+
 UsergridCompiler.prototype.visitConjunction = function(conjunction) {
   if (conjunction.isNegated) {
     this.filter.push('not');

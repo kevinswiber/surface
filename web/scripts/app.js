@@ -41,4 +41,9 @@ angular
   })
   .filter('encodeURIComponent', function() {
     return window.encodeURIComponent;
+  })
+  .filter('prettify', function() {
+    return function(obj) {
+      return JSON.stringify(obj, null, 2);
+    };
   });
